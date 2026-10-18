@@ -36,6 +36,8 @@ nav button.on .nav-copy small{color:inherit;opacity:.8}
 #vp canvas{display:block;width:100%;height:100%;touch-action:none}
 #scene-guides{position:absolute;right:12px;bottom:12px;z-index:2;width:min(226px,calc(100% - 24px));padding:9px;background:var(--glass);border:1px solid var(--ln);border-radius:10px;box-shadow:0 8px 24px var(--shadow)}
 #scene-guides .guide-head{display:flex;align-items:center;justify-content:space-between;margin:0 3px 6px;font-size:12px;color:var(--tx);font-weight:700}
+#scene-guides .guide-head .guide-actions{display:flex;align-items:center;gap:5px}
+#guideCollapse{display:none}
 #scene-guides .guide-head small{font-size:10px;color:var(--mu);font-weight:400}
 #scene-guides .guide-head button{width:auto;padding:3px 7px;border:1px solid var(--ln);border-radius:5px;color:var(--ac);font-size:10px;font-weight:600}
 #coord-readout{border-top:1px solid var(--ln);margin:5px 2px 0;padding:6px 2px 1px;color:var(--mu);font:10px/1.4 ui-monospace,monospace;text-align:center}
@@ -64,6 +66,8 @@ input[type=color]{padding:0;height:28px}
 input[type=range]{padding:0;accent-color:var(--ac);grid-column:2/5}
 footer{grid-column:1/4;display:flex;align-items:center;gap:16px;padding:0 12px;background:var(--p);border-top:1px solid var(--ln);color:var(--mu);font-size:12px}
 footer span:last-child{margin-left:auto}
+#save-state{color:var(--ac);font-size:11px;white-space:nowrap}
+#save-state.err{color:#ef6b6b}
 #toast{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);background:var(--p2);border:1px solid var(--ln);padding:8px 14px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:92%;text-align:center}
 #toast.on{opacity:1}
 #hint{position:absolute;left:12px;top:12px;max-width:300px;background:var(--glass);border:1px solid var(--ln);border-radius:10px;padding:12px 14px;color:var(--mu)}
@@ -82,7 +86,7 @@ footer span:last-child{margin-left:auto}
 #res .it.on{background:var(--p2)}
 #res small{margin-left:auto;color:var(--mu)}
 #pimg{max-width:100%;max-height:60vh;display:block;margin:auto;background:repeating-conic-gradient(#555 0 25%,#444 0 50%) 0 0/16px 16px}
-@media(max-width:760px){body{grid-template:44px 1fr 40vh 24px/148px 1fr}header,footer{grid-column:1/3}aside{grid-column:1/3;border-left:0;border-top:1px solid var(--ln)}#sb span{display:none}#hint{display:none}nav{padding:8px 6px}nav button{min-height:38px;gap:7px;padding:5px 7px}.nav-copy small{font-size:9px}#scene-guides{right:8px;bottom:8px;width:min(218px,calc(100% - 16px));padding:7px}}
+@media(max-width:760px){body{grid-template:44px 58px minmax(0,1fr) minmax(210px,32vh) 24px/1fr}header,footer,aside{grid-column:1}header{gap:6px;padding:0 8px}#sb{flex:0 0 38px;max-width:none;min-width:38px;justify-content:center;padding:6px}#sb span,#sb kbd{display:none}#ex{font-size:11px;gap:4px;padding:6px 8px}#bl,#pr{width:38px;height:38px;justify-content:center;padding:6px}#bl span,#pr span,#tu{display:none}nav{grid-column:1;grid-row:2;flex-direction:row;align-items:center;gap:6px;padding:6px;overflow-x:auto;overflow-y:hidden;border-right:0;border-bottom:1px solid var(--ln);scrollbar-width:thin;touch-action:pan-x}nav .nav-head,nav .nav-spacer{display:none}nav button{width:auto;min-width:108px;min-height:46px;gap:7px;padding:6px 9px;scroll-snap-align:start}nav button .i{width:18px;height:18px}.nav-copy small{display:none}#hint{display:none}#vp{grid-row:3}aside{grid-row:4;border-left:0;border-top:1px solid var(--ln);padding:8px}footer{grid-row:5;gap:8px;padding:0 8px;font-size:10px}#st{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#cc{display:none}#scene-guides{right:8px;bottom:8px;width:min(218px,calc(100% - 16px));padding:7px}#scene-guides button{min-height:44px}#scene-guides .guide-head button{min-height:36px}#pad{bottom:auto;top:8px;left:8px}#pad button{min-width:44px;height:44px}#pad select{min-height:40px}#cats button{min-height:40px}#res .it{min-height:48px}aside .row{min-height:44px}aside .row button{min-width:40px;min-height:40px}}
 #pad{position:absolute;left:12px;bottom:12px;background:var(--glass);border:1px solid var(--ln);border-radius:10px;padding:8px;display:none;min-width:158px}
 #pad .ph{display:flex;align-items:center;gap:6px;margin-bottom:4px}
 #pad select{width:auto;padding:2px 4px;background:var(--bg);color:var(--tx);border:1px solid var(--ln);border-radius:6px;font:inherit}
@@ -100,6 +104,9 @@ footer span:last-child{margin-left:auto}
 #tut .tb .btn{flex:1;justify-content:center}
 #tut .btn[disabled]{opacity:.5;cursor:default}
 @media(max-width:760px){#pad{bottom:auto;top:12px}}
+@media(max-width:380px){header{gap:4px;padding:0 5px}.logo{gap:4px;font-size:12px}.logo svg{width:22px;height:22px}#sb{flex-basis:34px;min-width:34px;padding:5px}#ex{width:34px;height:36px;justify-content:center;padding:5px}#ex span{display:none}#bl,#pr{width:34px;height:36px;padding:5px}}
+@media(pointer:coarse){nav button{min-height:48px}#scene-guides button{min-height:44px}#pad button{min-width:44px;height:44px}#cats button{min-height:42px}#res .it{min-height:48px}aside .row{min-height:44px}aside .row button{min-width:40px;min-height:40px}}
+@media(max-width:760px){#guideCollapse{display:block;min-height:36px}#scene-guides.compact{width:auto;max-width:calc(100% - 16px)}#scene-guides.compact .guide-head{margin-bottom:0}#scene-guides.compact #zFront,#scene-guides.compact #zGuideToggle,#scene-guides.compact #groundGuideToggle,#scene-guides.compact #coord-readout{display:none}}
 </style>
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('blendy-theme')==='light'?'light':'dark'}catch{document.documentElement.dataset.theme='dark'}</script>
 </head>
@@ -116,12 +123,13 @@ footer span:last-child{margin-left:auto}
 <main id="vp">
   <div id="hint"><b>はじめに</b>
     <p>左のツールバーから図形・色・素材・配置などを選び、カテゴリ内の操作を一覧から実行できます。上の検索 (Ctrl+K) は操作名が分かるときに便利です。</p>
-    <p>物体を選ぶと矢印や輪のハンドルが出ます。ドラッグで移動・回転・拡大縮小 (上下の移動は緑の矢印)。左下のボタンでも動かせます。空白のドラッグで視点回転、右ドラッグで平行移動、ホイールで拡大縮小。</p>
+    <p>物体を選ぶと矢印や輪のハンドルが出ます。ドラッグで移動・回転・拡大縮小 (上下の移動は緑の矢印)。空白ドラッグで視点回転、右ドラッグで平行移動、ホイールで拡大縮小。スマホはツールバーを横にスワイプし、1本指で選択物体の移動／空白の視点回転、2本指でズーム・平行移動。</p>
     <p>右下では垂直な Z=0 (XY) 面と水平な Y=0 (XZ) 床を個別に切替。正面ビューとカーソル座標も確認できます。</p>
     <p>右上からPNG出力、左ツールバーの下からライト／ダーク表示を選べます。</p>
+    <p>作品・視点・表示設定はこのブラウザに自動保存され、次回も復元されます。別の端末とは共有されません。</p>
     <button id="hx">閉じる</button></div>
   <div id="scene-guides" aria-label="座標基準面">
-    <div class="guide-head"><span>座標ガイド</span><button id="zFront" title="Z=0面を正面から見る">正面ビュー</button></div>
+    <div class="guide-head"><span>座標ガイド</span><span class="guide-actions"><button id="zFront" title="Z=0面を正面から見る">正面ビュー</button><button id="guideCollapse" aria-expanded="true" aria-controls="zGuideToggle">閉じる</button></span></div>
     <button id="zGuideToggle" aria-pressed="true" title="Z=0の垂直基準面を表示／非表示">
       <span class="guide-swatch z"></span><span class="guide-label"><b>Z = 0</b><small>垂直のXY基準面</small></span><span class="guide-state">表示中</span>
     </button>
@@ -133,7 +141,7 @@ footer span:last-child{margin-left:auto}
   <div id="toast"></div>
 </main>
 <aside id="side"></aside>
-<footer><span id="st"></span><span id="cc"></span></footer>
+<footer><span id="st"></span><span id="save-state" title="作品・視点はこのブラウザに自動保存されます">自動保存の準備中</span><span id="cc"></span></footer>
 
 <div class="modal" id="pal"><div class="box">
   <input id="q" placeholder="操作名で検索。検索せずカテゴリからも選べます (例: 球 / 赤 / 回転)" autocomplete="off" aria-label="操作名で検索">
@@ -177,7 +185,7 @@ wave:'M3 12c3-6 5-6 9 0s6 6 9 0'};
 const ic=n=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="${IC[n]}"/></svg>`;
 const CI={追加:'cube',移動:'move',回転:'rot',拡大縮小:'scl',色:'sphere',素材:'sphere',変形:'wave',配置:'grid',編集:'copy',ライト:'light',シーン:'grid',カメラ:'cam',書き出し:'img',テンプレート:'cube'};
 $('#lg').innerHTML=ic('cube')+'Blendy 3D';
-$('#ex').innerHTML=ic('img')+'PNG書き出し';
+$('#ex').innerHTML=ic('img')+'<span>PNG書き出し</span>';$('#ex').setAttribute('aria-label','PNGを書き出す');$('#ex').title='PNG書き出し';
 /* ---------- 3D 基盤 ---------- */
 const vp=$('#vp'),R=new T.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true}),cv=R.domElement;
 R.shadowMap.enabled=true;vp.prepend(cv);
@@ -594,7 +602,7 @@ function padDraw(){pad.style.display=sel.length?'block':'none';if(!sel.length)re
  const rows={move:[['x','左右','al','ar'],['y','上下','ad','au'],['z','奥・手前','af','an']],rot:[['x','X軸','minus','plus'],['y','Y軸','minus','plus'],['z','Z軸','minus','plus']],scl:[['x','X方向','minus','plus'],['y','Y方向','minus','plus'],['z','Z方向','minus','plus'],['u','全体','minus','plus']]}[tool];
  pad.innerHTML=`<div class="ph"><b>${{move:'位置',rot:'回転',scl:'大きさ'}[tool]}</b><select id="pst" aria-label="1回の量">${PS[tool].map(v=>`<option${v==pstep[tool]?' selected':''}>${v}</option>`).join('')}</select><span>${{move:'',rot:'度',scl:'倍'}[tool]}</span></div>`+rows.map(([a,l,m,p])=>`<div class="pr"><label>${l}</label><button data-a="${a}" data-s="-1" aria-label="${l} マイナス">${ic(m)}</button><button data-a="${a}" data-s="1" aria-label="${l} プラス">${ic(p)}</button></div>`).join('')}
 pad.onclick=e=>{const b=e.target.closest('button');if(!b)return;const a=b.dataset.a,s=+b.dataset.s,st=pstep[tool];run({f:()=>{const L=need();if(tool=='move')L.forEach(o=>o.position[a]+=s*st);else if(tool=='rot')rotAbout(L,AXN[a],s*st*PI/180);else L.forEach(o=>{const f=s>0?st:1/st;if(a=='u')o.scale.multiplyScalar(f);else o.scale[a]*=f})}})};
-pad.onchange=e=>{if(e.target.id=='pst')pstep[tool]=parseFloat(e.target.value)};
+pad.onchange=e=>{if(e.target.id=='pst'){pstep[tool]=parseFloat(e.target.value);queueSave()}};
 /* ---------- Blender 連携・3Dプリンタ ---------- */
 function dl(name,data,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:type||'application/octet-stream'}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
 const exList=()=>{const l=(sel.length?sel:objs).filter(o=>o.visible&&!o.userData.light&&!isCut(o));if(!l.length)throw Error('書き出せる物体がありません');return l},exLights=()=>sel.length?[]:objs.filter(o=>o.visible&&o.userData.light);
@@ -688,6 +696,8 @@ function importFile(f){const ext=f.name.split('.').pop().toLowerCase(),fr=new Fi
 const fi=document.createElement('input');fi.type='file';fi.accept='.obj,.stl,.glb';fi.multiple=true;fi.hidden=true;document.body.appendChild(fi);fi.onchange=()=>{[...fi.files].forEach(importFile);fi.value=''};
 ['dragover','drop'].forEach(t=>vp.addEventListener(t,e=>{e.preventDefault();if(t=='drop')[...e.dataTransfer.files].forEach(importFile)}));
 C('Blender連携','ファイルを読み込む (OBJ / STL / GLB)。画面へドラッグでも可','import open load 読み込み インポート blender',()=>fi.click(),1);
+$('#bl').innerHTML=ic('img')+'<span>Blender連携</span>';$('#bl').setAttribute('aria-label','Blender連携');$('#bl').title='Blender連携の書き出し';
+$('#pr').innerHTML=ic('cube')+'<span>3Dプリント</span>';$('#pr').setAttribute('aria-label','3Dプリント');$('#pr').title='3Dプリント用に書き出し';
 $('#bl').onclick=()=>openPal('Blender連携');$('#pr').onclick=()=>openPal('3Dプリント');
 /* 3Dプリント診断・修復 */
 function diag(o){const g=world(o),p=g.attributes.position,W=welder(1e-5),id=[],E=new Map(),par={},v=new T.Vector3(),A=new T.Vector3(),B=new T.Vector3(),Dd=new T.Vector3();let open=0,bad=0,vol=0;
@@ -750,10 +760,20 @@ side.addEventListener('focusin',e=>{if(e.target.dataset.k)pend=snap()});
 side.addEventListener('pointerdown',e=>{if(e.target.dataset.k)pend=snap()});
 side.addEventListener('input',e=>{const k=e.target.dataset.k,a=sel[sel.length-1];if(!k||!a)return;const v=e.target.value,n=parseFloat(v);
  if(k=='name')a.name=v;else if(k=='col')setCol(v,[a]);else if(k=='rough')a.material.roughness=n;else if(k=='metal')a.material.metalness=n;
- else if(!isNaN(n)){const t={p:a.position,r:a.rotation,s:a.scale}[k[0]];t[k[1]]=k[0]=='r'?n*PI/180:n}});
-side.addEventListener('change',()=>{if(pend){hist.push(pend);fut=[];pend=null}});
+ else if(!isNaN(n)){const t={p:a.position,r:a.rotation,s:a.scale}[k[0]];t[k[1]]=k[0]=='r'?n*PI/180:n}queueSave()});
+side.addEventListener('change',()=>{if(pend){hist.push(pend);fut=[];pend=null}queueSave()});
+const SAVE_KEY='blendy3d-autosave-v1';let saveTimer=0,restoring=false;
+function setSaveStatus(s,error=false){const e=$('#save-state');e.textContent=s;e.classList.toggle('err',error)}
+function packProject(){return{version:1,counter:cnt,tool,selected:sel.map(o=>objs.indexOf(o)).filter(i=>i>=0),steps:{...pstep},objects:objs.map(o=>{const light=o.userData.light;if(light)delete o.userData.light;try{return{json:o.toJSON(),hasLight:!!light}}finally{if(light)o.userData.light=light}}),settings:{bg,turn,cs:{t:cs.t.toArray(),th:cs.th,ph:cs.ph,r:cs.r},camera:{fov:cam.fov,toneMapping:R.toneMapping,exposure:R.toneMappingExposure},ambient:{color:amb.color.getHex(),intensity:amb.intensity},sun:{color:sun.color.getHex(),intensity:sun.intensity,position:sun.position.toArray()},fog:scene.fog?{near:scene.fog.near,far:scene.fog.far}:null,grid:grid.visible,axes:axes.visible,floor:floor.visible,zGuide:zGuide.visible,gizmo:gzOn}}}
+function saveProjectNow(){clearTimeout(saveTimer);saveTimer=0;if(restoring)return;try{localStorage.setItem(SAVE_KEY,JSON.stringify(packProject()));setSaveStatus('自動保存済み')}catch(e){setSaveStatus('自動保存に失敗',true);console.warn('Blendy 3D autosave failed',e)}}
+function queueSave(){if(restoring)return;setSaveStatus('保存中…');clearTimeout(saveTimer);saveTimer=setTimeout(saveProjectNow,450)}
+function loadProject(){let raw;try{raw=localStorage.getItem(SAVE_KEY)}catch(e){setSaveStatus('保存領域を使えません',true);return false}if(!raw){setSaveStatus('自動保存待機');return false}try{const d=JSON.parse(raw);if(d.version!==1||!Array.isArray(d.objects))throw Error('保存データの形式が違います');const loader=new T.ObjectLoader(),next=d.objects.map(x=>{const o=loader.parse(x.json);if(x.hasLight){const l=o.children.find(c=>c.isLight);if(!l)throw Error('ライトデータが読み込めません');o.userData.light=l}return o}),s=d.settings||{};restoring=true;objs.forEach(o=>scene.remove(o));objs=next;objs.forEach(o=>scene.add(o));cnt=Math.max(0,+d.counter||0);tool=['move','rot','scl'].includes(d.tool)?d.tool:'move';sel=(d.selected||[]).map(i=>objs[i]).filter(Boolean);if(d.steps)Object.assign(pstep,d.steps);bg=s.bg||bg;scene.background=new T.Color(bg);scene.fog=s.fog?new T.Fog(bg,s.fog.near,s.fog.far):null;if(s.cs){if(s.cs.t)cs.t.fromArray(s.cs.t);cs.th=s.cs.th??cs.th;cs.ph=s.cs.ph??cs.ph;cs.r=s.cs.r??cs.r}if(s.camera){cam.fov=s.camera.fov??cam.fov;cam.updateProjectionMatrix();R.toneMapping=s.camera.toneMapping??R.toneMapping;R.toneMappingExposure=s.camera.exposure??R.toneMappingExposure}if(s.ambient){amb.color.setHex(s.ambient.color);amb.intensity=s.ambient.intensity}if(s.sun){sun.color.setHex(s.sun.color);sun.intensity=s.sun.intensity;if(s.sun.position)sun.position.fromArray(s.sun.position)}grid.visible=s.grid!==false;axes.visible=s.axes!==false;floor.visible=s.floor!==false;zGuide.visible=s.zGuide!==false;if(typeof s.gizmo=='boolean')gzOn=s.gizmo;turn=+s.turn||0;hist=[];fut=[];dirty();document.querySelectorAll('#nv [data-t]').forEach(b=>b.classList.toggle('on',b.dataset.t==tool));refresh();restoring=false;setSaveStatus('保存データを復元');return true}catch(e){restoring=false;setSaveStatus('復元できません',true);console.warn('Blendy 3D restore failed',e);toast('前回の保存データを読み込めませんでした');return false}}
+addEventListener('pagehide',saveProjectNow);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')saveProjectNow()});
+const guidePanel=$('#scene-guides'),guideCollapse=$('#guideCollapse'),mobileLayout=matchMedia('(max-width:760px)');
+function setGuideCompact(v){guidePanel.classList.toggle('compact',v);guideCollapse.setAttribute('aria-expanded',String(!v));guideCollapse.textContent=v?'開く':'閉じる';guideCollapse.setAttribute('aria-label',v?'座標ガイドを開く':'座標ガイドを閉じる')}
+if(mobileLayout.matches)setGuideCompact(true);guideCollapse.onclick=()=>setGuideCompact(!guidePanel.classList.contains('compact'));mobileLayout.addEventListener('change',e=>setGuideCompact(e.matches));
 function syncGuideControls(){[['#zGuideToggle',zGuide],['#groundGuideToggle',grid]].forEach(([id,o])=>{const b=$(id);b.setAttribute('aria-pressed',String(o.visible));b.querySelector('.guide-state').textContent=o.visible?'表示中':'非表示'})}
-function refresh(){sel=sel.filter(o=>objs.includes(o));syncSel();panel();padDraw();syncGuideControls();$('#st').textContent=`物体 ${objs.length} / 選択 ${sel.length} / ドラッグ操作: ${{move:'移動',rot:'回転',scl:'拡大縮小'}[tool]}`;$('#cc').textContent=CMD.length+' 個の操作が使えます'}
+function refresh(){sel=sel.filter(o=>objs.includes(o));syncSel();panel();padDraw();syncGuideControls();$('#st').textContent=`物体 ${objs.length} / 選択 ${sel.length} / ドラッグ操作: ${{move:'移動',rot:'回転',scl:'拡大縮小'}[tool]}`;$('#cc').textContent=CMD.length+' 個の操作が使えます';queueSave()}
 $('#scene-guides').onclick=e=>{const b=e.target.closest('button');if(!b)return;const name={zGuideToggle:'Z=0の基準面を表示切替',groundGuideToggle:'グリッド表示切替',zFront:'正面から見る'}[b.id],c=CMD.find(x=>x.n==name);if(c)run(c)};
 
 /* ---------- 左ツールバー ---------- */
@@ -799,26 +819,28 @@ addEventListener('keydown',e=>{const typing=['INPUT','SELECT'].includes(e.target
  else if(ar){e.preventDefault();run({f:()=>need().forEach(o=>o.position[ar[0]]+=ar[1]*.5)})}});
 
 /* ---------- ビューポート操作 ---------- */
-const ray=new T.Raycaster(),mv=new T.Vector2(),gp=new T.Plane(Y,0),zCoordPlane=new T.Plane(new T.Vector3(0,0,1),0),zCoordHit=new T.Vector3();let dr=null;
+const ray=new T.Raycaster(),mv=new T.Vector2(),gp=new T.Plane(Y,0),zCoordPlane=new T.Plane(new T.Vector3(0,0,1),0),zCoordHit=new T.Vector3();let dr=null,pinch=null,touchDelta={id:-1,x:0,y:0};const touchPts=new Map();
+cv.addEventListener('pointermove',e=>{if(e.pointerType==='touch'&&touchPts.has(e.pointerId)){const p=touchPts.get(e.pointerId);touchDelta={id:e.pointerId,x:e.clientX-p.x,y:e.clientY-p.y};touchPts.set(e.pointerId,{x:e.clientX,y:e.clientY})}},true);
 function ndc(e){const r=cv.getBoundingClientRect();mv.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height*2-1));ray.setFromCamera(mv,cam)}
 const pickAt=e=>{ndc(e);const h=ray.intersectObjects(objs.filter(o=>o.visible),false)[0];return h&&h.object},hitPlane=e=>{ndc(e);const p=new T.Vector3();return ray.ray.intersectPlane(gp,p)?p:null};
 cv.addEventListener('contextmenu',e=>e.preventDefault());
-cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);let o=e.button==0?pickAt(e):null;dr={x:e.clientX,y:e.clientY,o,b:e.button,sh:e.shiftKey,moved:false};
+cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);if(e.pointerType==='touch'){touchPts.set(e.pointerId,{x:e.clientX,y:e.clientY});if(touchPts.size===2){const [a,b]=touchPts.values(),dx=b.x-a.x,dy=b.y-a.y;pinch={distance:Math.max(1,Math.hypot(dx,dy)),x:(a.x+b.x)/2,y:(a.y+b.y)/2,r:cs.r,t:cs.t.clone()};dr=null;e.preventDefault();return}if(touchPts.size>2){dr=null;return}}let o=e.button==0?pickAt(e):null;dr={x:e.clientX,y:e.clientY,o,b:e.button,sh:e.shiftKey,moved:false};
  if(o){if(e.shiftKey&&sel.includes(o)){sel=sel.filter(s=>s!==o);refresh();dr.o=null;return}
   if(!sel.includes(o)){sel=e.shiftKey?[...sel,o]:[o];refresh()}
   dr.pre=snap();gp.constant=-o.position.y;dr.p0=hitPlane(e);dr.st=sel.map(s=>s.position.clone())}});
-cv.addEventListener('pointermove',e=>{const out=$('#coord-readout');if(zGuide.visible){ndc(e);const p=ray.ray.intersectPlane(zCoordPlane,zCoordHit);out.textContent=p?`Z = 0 · X ${f2(p.x)} / Y ${f2(p.y)}`:'Z = 0 · 交点なし'}else out.textContent='Z = 0 面は非表示です';if(!dr)return;if(!dr.moved&&Math.hypot(e.clientX-dr.x,e.clientY-dr.y)<3)return;dr.moved=true;const mx=e.movementX||0,my=e.movementY||0;
+cv.addEventListener('pointermove',e=>{const out=$('#coord-readout');if(zGuide.visible){ndc(e);const p=ray.ray.intersectPlane(zCoordPlane,zCoordHit);out.textContent=p?`Z = 0 · X ${f2(p.x)} / Y ${f2(p.y)}`:'Z = 0 · 交点なし'}else out.textContent='Z = 0 面は非表示です';if(e.pointerType==='touch'&&touchPts.has(e.pointerId)){touchPts.set(e.pointerId,{x:e.clientX,y:e.clientY});if(touchPts.size>=2&&pinch){const [a,b]=touchPts.values(),dx=b.x-a.x,dy=b.y-a.y,d=Math.max(1,Math.hypot(dx,dy)),mx=(a.x+b.x)/2,my=(a.y+b.y)/2;cs.r=clamp(pinch.r*pinch.distance/d,1,80);const right=new T.Vector3().setFromMatrixColumn(cam.matrix,0),up=new T.Vector3().setFromMatrixColumn(cam.matrix,1),k=cs.r*.0015;cs.t.copy(pinch.t).addScaledVector(right,-(mx-pinch.x)*k).addScaledVector(up,(my-pinch.y)*k);e.preventDefault();return}}if(!dr)return;if(!dr.moved&&Math.hypot(e.clientX-dr.x,e.clientY-dr.y)<3)return;dr.moved=true;const d=touchDelta.id===e.pointerId?touchDelta:{x:e.movementX||0,y:e.movementY||0},mx=d.x,my=d.y;
  if(dr.o){if(tool=='move'){const p=hitPlane(e);if(p&&dr.p0)sel.forEach((s,i)=>{s.position.x=dr.st[i].x+p.x-dr.p0.x;s.position.z=dr.st[i].z+p.z-dr.p0.z})}
   else if(tool=='rot')sel.forEach(s=>{s.rotation.y+=mx*.01;s.rotation.x+=my*.01});
   else{const f=1-my*.01;sel.forEach(s=>s.scale.multiplyScalar(f))}}
  else if(dr.b==0&&!e.shiftKey){cs.th-=mx*.008;cs.ph=clamp(cs.ph-my*.008,.05,PI-.05)}
  else{const r=new T.Vector3().setFromMatrixColumn(cam.matrix,0),u=new T.Vector3().setFromMatrixColumn(cam.matrix,1),k=cs.r*.0015;cs.t.addScaledVector(r,-mx*k).addScaledVector(u,my*k)}});
-cv.addEventListener('pointerup',()=>{if(!dr)return;if(dr.o&&dr.moved){hist.push(dr.pre);fut=[];refresh()}else if(!dr.moved&&dr.b==0&&!dr.o&&!dr.sh){sel=[];refresh()}dr=null});
-cv.addEventListener('wheel',e=>{e.preventDefault();cs.r=clamp(cs.r*Math.exp(e.deltaY*.001),1,80)},{passive:false});
+function endPointer(e){if(e.pointerType==='touch'){touchPts.delete(e.pointerId);if(pinch){pinch=null;dr=null;queueSave();return}}if(!dr)return;if(dr.o&&dr.moved){hist.push(dr.pre);fut=[];refresh()}else if(!dr.moved&&dr.b==0&&!dr.o&&!dr.sh){sel=[];refresh()}else if(dr.moved)queueSave();dr=null}
+cv.addEventListener('pointerup',endPointer);cv.addEventListener('pointercancel',endPointer);
+cv.addEventListener('wheel',e=>{e.preventDefault();cs.r=clamp(cs.r*Math.exp(e.deltaY*.001),1,80);queueSave()},{passive:false});
 
 /* ---------- 起動 ---------- */
-addShape('sph');col('#3a7bd5');addShape('box');col('#ff9f1c');addShape('tor');col('#ff4d9d');sel=[];
-setTool('move');
+if(!loadProject()){addShape('sph');col('#3a7bd5');addShape('box');col('#ff9f1c');addShape('tor');col('#ff4d9d');sel=[]}
+setTool(tool);
 let last=performance.now();
 (function loop(t){requestAnimationFrame(loop);const dt=Math.min((t-last)/1000,.1);last=t;if(turn)cs.th+=turn*dt;placeCam();BH.forEach(h=>h.update());gzUpdate();R.render(scene,cam)})(last);
 </script>
