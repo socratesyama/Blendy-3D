@@ -1,0 +1,777 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Blendy 3D</title>
+<style>
+:root{--bg:#161a24;--p:#1d2230;--p2:#283044;--ln:#363f56;--tx:#e9edf6;--mu:#8e99b3;--ac:#3ddbbd;--on:#07201b;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden}
+body{display:grid;grid-template:44px 1fr 24px/52px 1fr 288px;font:13px/1.45 system-ui,"Hiragino Sans","Noto Sans JP",sans-serif;background:var(--bg);color:var(--tx)}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--ac);outline-offset:1px}
+header{grid-column:1/4;display:flex;align-items:center;gap:12px;padding:0 12px;background:var(--p);border-bottom:1px solid var(--ln)}
+.logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px}
+.logo svg{width:26px;height:26px;color:var(--ac)}
+#sb{flex:1;max-width:540px;display:flex;align-items:center;gap:8px;padding:7px 12px;border:1px solid var(--ln);border-radius:8px;background:var(--bg);color:var(--mu);text-align:left}
+#sb:hover{border-color:var(--ac)}
+#sb kbd{margin-left:auto}
+kbd{font:11px ui-monospace,monospace;border:1px solid var(--ln);border-radius:4px;padding:0 5px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;background:var(--ac);color:var(--on);font-weight:700;text-decoration:none}
+nav{background:var(--p);border-right:1px solid var(--ln);display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 0;overflow:auto}
+nav button{width:38px;height:38px;border-radius:8px;display:grid;place-items:center;color:var(--mu);flex:none}
+nav button:hover{background:var(--p2);color:var(--tx)}
+nav button.on{background:var(--ac);color:var(--on)}
+nav hr{width:28px;border:0;border-top:1px solid var(--ln);margin:4px 0}
+#vp{position:relative;min-width:0;min-height:0}
+#vp canvas{display:block;width:100%;height:100%;touch-action:none}
+aside{background:var(--p);border-left:1px solid var(--ln);overflow:auto;padding:10px}
+aside h3{margin:14px 0 6px;font-size:12px;color:var(--mu);font-weight:600}
+aside h3:first-child{margin-top:0}
+.row{display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:6px;cursor:pointer}
+.row:hover{background:var(--p2)}
+.row.on{background:#17403c;outline:1px solid var(--ac)}
+.row span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row button{color:var(--mu)}
+.g3{display:grid;grid-template-columns:34px 1fr 1fr 1fr;gap:4px;align-items:center;margin-bottom:4px}
+.g3 label{color:var(--mu)}
+input{font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--ln);border-radius:6px;padding:4px 6px;min-width:0;width:100%}
+input[type=color]{padding:0;height:28px}
+input[type=range]{padding:0;accent-color:var(--ac);grid-column:2/5}
+footer{grid-column:1/4;display:flex;align-items:center;gap:16px;padding:0 12px;background:var(--p);border-top:1px solid var(--ln);color:var(--mu);font-size:12px}
+footer span:last-child{margin-left:auto}
+#toast{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);background:var(--p2);border:1px solid var(--ln);padding:8px 14px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:92%;text-align:center}
+#toast.on{opacity:1}
+#hint{position:absolute;left:12px;top:12px;max-width:300px;background:rgba(29,34,48,.94);border:1px solid var(--ln);border-radius:10px;padding:12px 14px;color:var(--mu)}
+#hint b{color:var(--tx)}
+#hint p{margin:6px 0}
+#hint button{margin-top:4px;color:var(--ac);padding:0}
+.modal{position:fixed;inset:0;background:rgba(5,8,14,.6);display:none;justify-content:center;align-items:flex-start;padding-top:9vh;z-index:9}
+.modal.on{display:flex}
+.box{width:min(640px,94vw);background:var(--p);border:1px solid var(--ln);border-radius:12px;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.55)}
+#q{border:0;border-bottom:1px solid var(--ln);border-radius:0;padding:14px 16px;font-size:16px}
+#cats{display:flex;gap:6px;overflow-x:auto;padding:8px 12px;border-bottom:1px solid var(--ln)}
+#cats button{padding:3px 10px;border-radius:99px;border:1px solid var(--ln);color:var(--mu);white-space:nowrap}
+#cats button.on{background:var(--ac);color:var(--on);border-color:var(--ac)}
+#res{max-height:50vh;overflow:auto}
+#res .it{display:flex;align-items:center;gap:10px;padding:8px 16px;cursor:pointer}
+#res .it.on{background:var(--p2)}
+#res small{margin-left:auto;color:var(--mu)}
+#pimg{max-width:100%;max-height:60vh;display:block;margin:auto;background:repeating-conic-gradient(#555 0 25%,#444 0 50%) 0 0/16px 16px}
+@media(max-width:760px){body{grid-template:44px 1fr 40vh 24px/52px 1fr}header,footer{grid-column:1/3}aside{grid-column:1/3;border-left:0;border-top:1px solid var(--ln)}#sb span{display:none}#hint{display:none}}
+#pad{position:absolute;left:12px;bottom:12px;background:rgba(29,34,48,.94);border:1px solid var(--ln);border-radius:10px;padding:8px;display:none;min-width:158px}
+#pad .ph{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+#pad select{width:auto;padding:2px 4px;background:var(--bg);color:var(--tx);border:1px solid var(--ln);border-radius:6px;font:inherit}
+#pad .pr{display:flex;align-items:center;gap:6px;margin-top:4px}
+#pad label{flex:1;color:var(--mu)}
+#pad button{width:36px;height:30px;border:1px solid var(--ln);border-radius:6px;display:grid;place-items:center}
+#pad button:hover{background:var(--p2);border-color:var(--ac)}
+.btn.alt{background:var(--p2);color:var(--tx)}
+#tut{position:absolute;right:12px;top:12px;width:min(320px,92%);background:rgba(29,34,48,.96);border:1px solid var(--ln);border-radius:10px;padding:12px 14px;display:none;max-height:calc(100% - 24px);overflow:auto}
+#tut h4{margin:6px 0 4px;font-size:15px}
+#tut p{margin:4px 0;color:var(--mu)}
+#tut .tl{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0}
+#tut .tl span{border:1px solid var(--ln);border-radius:99px;padding:1px 8px;font-size:12px}
+#tut .tb{display:flex;gap:6px;margin-top:6px}
+#tut .tb .btn{flex:1;justify-content:center}
+#tut .btn[disabled]{opacity:.5;cursor:default}
+@media(max-width:760px){#pad{bottom:auto;top:12px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo" id="lg"></div>
+  <button id="sb" aria-label="コマンドを検索"></button>
+  <button class="btn" id="ex"></button>
+  <button class="btn alt" id="tu">ウサギを作る</button>
+  <button class="btn alt" id="bl">Blender連携</button>
+  <button class="btn alt" id="pr">3Dプリント</button>
+</header>
+<nav id="nv"></nav>
+<main id="vp">
+  <div id="hint"><b>はじめに</b>
+    <p>上の検索ボックス (Ctrl+K) に「球」「赤」「回転」「複製」などを入力して選ぶだけで操作できます。</p>
+    <p>物体を選ぶと矢印や輪のハンドルが出ます。ドラッグで移動・回転・拡大縮小 (上下の移動は緑の矢印)。左下のボタンでも動かせます。空白のドラッグで視点回転、右ドラッグで平行移動、ホイールで拡大縮小。</p>
+    <p>できあがったら右上の「PNG書き出し」へ。</p>
+    <button id="hx">閉じる</button></div>
+  <div id="toast"></div>
+</main>
+<aside id="side"></aside>
+<footer><span id="st"></span><span id="cc"></span></footer>
+
+<div class="modal" id="pal"><div class="box">
+  <input id="q" placeholder="やりたいことを入力 (例: 赤 / 回転 / 球 / 複製)" autocomplete="off" aria-label="コマンド検索">
+  <div id="cats"></div><div id="res"></div>
+</div></div>
+
+<div class="modal" id="pv"><div class="box" style="padding:16px">
+  <img id="pimg" alt="書き出しプレビュー">
+  <div style="display:flex;gap:8px;align-items:center;margin-top:12px">
+    <span id="pz" style="margin-right:auto;color:var(--mu)"></span>
+    <button id="pc" class="btn" style="background:var(--p2);color:var(--tx)">閉じる</button>
+    <a id="pd" class="btn" download="blendy3d.png">PNGを保存</a>
+  </div>
+</div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const T=THREE,$=s=>document.querySelector(s),PI=Math.PI,S2=PI*2,clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* 手描きアイコン (24x24 ストローク) */
+const IC={
+sel:'M5 3l13 8-6 1.5L9.5 19z',
+move:'M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3',
+rot:'M19 12a7 7 0 1 1-2.1-5M19 4v4h-4',
+scl:'M4 20V10h10v10zM14 10l6-6M15 4h5v5',
+cube:'M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5',
+sphere:'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM3 12c0 2 4 3.5 9 3.5s9-1.5 9-3.5',
+light:'M12 3a6 6 0 0 0-3.5 10.9V17h7v-3.1A6 6 0 0 0 12 3zM9.5 20h5',
+search:'M10.5 4a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM15.5 15.5L20 20',
+undo:'M9 7L4 12l5 5M4 12h10a6 6 0 0 1 0 8h-2',
+redo:'M15 7l5 5-5 5M20 12H10a6 6 0 0 0 0 8h2',
+trash:'M5 7h14M9 7V4h6v3M7 7l1 13h8l1-13',
+copy:'M8 8h11v11H8zM5 16V5h11',
+cam:'M4 8h11v9H4zM15 11l5-3v9l-5-3',
+img:'M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M15 9.5h.01',
+grid:'M4 4h16v16H4zM4 9.3h16M4 14.7h16M9.3 4v16M14.7 4v16',
+eye:'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z',
+eyeoff:'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM3 3l18 18',
+wave:'M3 12c3-6 5-6 9 0s6 6 9 0'};
+const ic=n=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="${IC[n]}"/></svg>`;
+const CI={追加:'cube',移動:'move',回転:'rot',拡大縮小:'scl',色:'sphere',素材:'sphere',変形:'wave',配置:'grid',編集:'copy',ライト:'light',シーン:'grid',カメラ:'cam',書き出し:'img',テンプレート:'cube'};
+$('#lg').innerHTML=ic('cube')+'Blendy 3D';
+$('#ex').innerHTML=ic('img')+'PNG書き出し';
+/* ---------- 3D 基盤 ---------- */
+const vp=$('#vp'),R=new T.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true}),cv=R.domElement;
+R.shadowMap.enabled=true;vp.prepend(cv);
+const scene=new T.Scene(),cam=new T.PerspectiveCamera(50,1,.1,500);
+let bg='#2b3144';scene.background=new T.Color(bg);
+const amb=new T.HemisphereLight(0xffffff,0x39404f,.75);
+const sun=new T.DirectionalLight(0xffffff,.9);sun.position.set(6,9,5);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
+Object.assign(sun.shadow.camera,{left:-12,right:12,top:12,bottom:-12,near:1,far:40});
+const grid=new T.GridHelper(24,24,0x5d6882,0x3c4459),axes=new T.AxesHelper(2.5);
+const floor=new T.Mesh(new T.PlaneGeometry(60,60).rotateX(-PI/2),new T.ShadowMaterial({opacity:.3}));floor.receiveShadow=true;floor.position.y=-.001;
+scene.add(amb,sun,grid,axes,floor);
+const cs={t:new T.Vector3(0,.8,0),th:.8,ph:1.1,r:9};
+function placeCam(){cam.position.set(cs.t.x+cs.r*Math.sin(cs.ph)*Math.sin(cs.th),cs.t.y+cs.r*Math.cos(cs.ph),cs.t.z+cs.r*Math.sin(cs.ph)*Math.cos(cs.th));cam.lookAt(cs.t)}
+new ResizeObserver(()=>{const w=vp.clientWidth,h=vp.clientHeight;R.setPixelRatio(devicePixelRatio);R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}).observe(vp);
+/* ---------- 状態 ---------- */
+let objs=[],sel=[],tool='move',hist=[],fut=[],turn=0,cnt=0,BH=[],pend=null;
+const Y=new T.Vector3(0,1,0),V=(a,v)=>{const r=new T.Vector3();r[a]=v;return r};
+const bs=o=>new T.Box3().setFromObject(o).getSize(new T.Vector3());
+const need=()=>{if(!sel.length)throw Error('先にオブジェクトを選んでください');return sel};
+const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('on'),2200)};
+const dirty=()=>scene.traverse(o=>{if(o.material)o.material.needsUpdate=true});
+
+const S3=[.2,.1,0];
+const G={
+box:['立方体',()=>new T.BoxGeometry(1.4,1.4,1.4,12,12,12),'cube box 箱 四角'],
+slab:['板',()=>new T.BoxGeometry(2.4,.2,1.6,12,1,8),'slab plate'],
+wall:['壁',()=>new T.BoxGeometry(3,2,.2,12,8,1),'wall'],
+pillar:['柱',()=>new T.BoxGeometry(.5,3,.5,2,12,2),'pillar column'],
+sph:['球',()=>new T.SphereGeometry(.6,48,32),'sphere ball 丸'],
+lowsph:['低ポリ球',()=>new T.SphereGeometry(.7,10,7),'lowpoly sphere'],
+egg:['卵',()=>new T.SphereGeometry(.6,48,32).scale(1,1.3,1),'egg'],
+half:['半球',()=>new T.SphereGeometry(.8,40,20,0,S2,0,PI/2),'hemisphere dome ドーム'],
+cyl:['円柱',()=>new T.CylinderGeometry(.6,.6,1.4,48,8),'cylinder'],
+disc:['円盤',()=>new T.CylinderGeometry(1,1,.15,64,1),'disc plate'],
+pipe:['筒',()=>new T.CylinderGeometry(.6,.6,1.4,48,8,true),'pipe tube'],
+cone:['円錐',()=>new T.ConeGeometry(.7,1.4,48,8),'cone'],
+pyr:['四角錐',()=>new T.ConeGeometry(.9,1.3,4,6),'pyramid'],
+hex:['六角柱',()=>new T.CylinderGeometry(.7,.7,1,6,4),'hexagon'],
+prism:['三角柱',()=>new T.CylinderGeometry(.8,.8,1.4,3,4),'prism triangle'],
+tor:['ドーナツ',()=>new T.TorusGeometry(.6,.25,24,64).rotateX(PI/2),'torus donut'],
+ring:['細いリング',()=>new T.TorusGeometry(.8,.06,16,64).rotateX(PI/2),'ring'],
+knot:['結び目',()=>new T.TorusKnotGeometry(.5,.16,128,16),'torus knot'],
+pla:['平面',()=>new T.PlaneGeometry(3,3,16,16).rotateX(-PI/2),'plane floor 床'],
+circ:['円',()=>new T.CircleGeometry(1,48).rotateX(-PI/2),'circle'],
+ico:['二十面体',()=>new T.IcosahedronGeometry(.7,0),'icosahedron'],
+oct:['八面体',()=>new T.OctahedronGeometry(.7,0),'octahedron'],
+tet:['四面体',()=>new T.TetrahedronGeometry(.8,0),'tetrahedron'],
+dod:['十二面体',()=>new T.DodecahedronGeometry(.7,0),'dodecahedron'],
+vase:['花瓶',()=>new T.LatheGeometry([...Array(24)].map((_,i)=>new T.Vector2(.3+.25*Math.sin(i*.28),i*.07-.8)),48),'vase lathe'],
+cap:['カプセル',()=>{const p=[];for(let i=0;i<=8;i++){const a=i/8*PI/2;p.push(new T.Vector2(Math.sin(a)*.4,-.4-Math.cos(a)*.4))}for(let i=0;i<=8;i++){const a=i/8*PI/2;p.push(new T.Vector2(Math.cos(a)*.4,.4+Math.sin(a)*.4))}return new T.LatheGeometry(p,32)},'capsule pill']
+};
+function mk(g,name,col){const m=new T.Mesh(g,new T.MeshStandardMaterial({color:col||'#c8ced8',roughness:.55,metalness:.05,side:T.DoubleSide}));m.name=name+' '+(++cnt);m.castShadow=m.receiveShadow=true;return m}
+const reg=m=>{objs.push(m);scene.add(m);return m};
+function addShape(k){const g=G[k][1]();g.computeBoundingBox();const m=mk(g,G[k][0]),n=objs.length,p=[[0,0],[2,0],[-2,0],[0,2],[0,-2],[2,2],[-2,2],[2,-2],[-2,-2]][n%9],o=Math.floor(n/9)*.5;m.position.set(p[0]+o,-g.boundingBox.min.y,p[1]+o);m.userData.kind=k;reg(m);sel=[m]}
+function put(k,pos,size,col,ry){const g=G[k][1]();g.computeBoundingBox();const b=g.boundingBox.getSize(new T.Vector3()),m=mk(g,G[k][0],col);m.scale.set(size[0]/b.x,size[1]/b.y,size[2]/b.z);m.position.set(...pos);if(ry)m.rotation.y=ry;m.userData.kind=k;return reg(m)}
+function addLight(kind,col){const m=new T.Mesh(new T.SphereGeometry(.2,16,12),new T.MeshStandardMaterial({color:col,emissive:col,roughness:1}));m.name='ライト '+(++cnt);
+ const L=kind=='p'?new T.PointLight(col,1.3,40,1):kind=='s'?new T.SpotLight(col,1.6,60,.6,.4,1):new T.DirectionalLight(col,.8);L.castShadow=kind!='p';m.add(L);m.userData.light=L;m.position.set(0,4,0);reg(m);sel=[m]}
+function dup(o,d){const c=o.clone();c.material=o.material.clone();if(o.userData.light)c.userData={light:c.children.find(x=>x.isLight)};c.name=o.name.replace(/ \d+$/,'')+' '+(++cnt);if(d)c.position.add(d);return reg(c)}
+function del(){need().forEach(o=>scene.remove(o));objs=objs.filter(o=>!sel.includes(o));sel=[]}
+/* ---------- 履歴 ---------- */
+const mp=m=>({c:m.color.getHex(),r:m.roughness,m:m.metalness,e:m.emissive.getHex(),ei:m.emissiveIntensity,w:m.wireframe,o:m.opacity,f:m.flatShading,t:m.map,vc:m.vertexColors});
+const snap=()=>({list:objs.slice(),sel:sel.slice(),st:objs.map(o=>({o,p:o.position.clone(),r:o.rotation.clone(),s:o.scale.clone(),v:o.visible,g:o.geometry,n:o.name,m:mp(o.material)}))});
+function restore(s){objs.forEach(o=>scene.remove(o));objs=s.list.slice();objs.forEach(o=>scene.add(o));
+ s.st.forEach(x=>{const o=x.o,m=o.material,q=x.m;o.position.copy(x.p);o.rotation.copy(x.r);o.scale.copy(x.s);o.visible=x.v;o.geometry=x.g;o.name=x.n;m.color.setHex(q.c);m.roughness=q.r;m.metalness=q.m;m.emissive.setHex(q.e);m.emissiveIntensity=q.ei;m.wireframe=q.w;m.opacity=q.o;m.transparent=q.o<1;m.flatShading=q.f;m.map=q.t;m.vertexColors=q.vc;m.needsUpdate=true;if(o.userData.light)o.userData.light.color.setHex(q.c)});
+ sel=s.sel.slice();dirty()}
+function undo(){if(!hist.length)return toast('これ以上戻せません');fut.push(snap());restore(hist.pop());refresh()}
+function redo(){if(!fut.length)return toast('やり直す操作がありません');hist.push(snap());restore(fut.pop());refresh()}
+function run(c){if(!c)return;let b=c.nh?null:snap();try{c.f()}catch(e){toast(e.message);return}if(b){hist.push(b);if(hist.length>80)hist.shift();fut=[];dirty()}refresh()}
+/* ---------- コマンド定義 ---------- */
+const CMD=[],C=(c,n,k,f,nh)=>CMD.push({c,n,k:(c+' '+n+' '+k).toLowerCase(),f,nh});
+const AX=[['x','X','左右'],['y','Y','上下'],['z','Z','前後']],DW={x:['左','右'],y:['下','上'],z:['奥','手前']},sg=v=>v>0?'+'+v:''+v;
+const eM=f=>need().forEach(o=>f(o.material,o));
+function setCol(h,list){list.forEach(o=>{o.material.color.set(h);if(o.material.vertexColors){o.material.vertexColors=false;o.material.needsUpdate=true}if(o.userData.light){o.userData.light.color.set(h);o.material.emissive.set(h)}})}
+const col=h=>setCol(h,need());
+
+/* 追加 */
+Object.entries(G).forEach(([k,v])=>C('追加',v[0]+'を追加','add create new '+v[2],()=>addShape(k)));
+/* 移動 */
+AX.forEach(([a,A,w])=>[-1,1].forEach(s=>[.1,.5,1,5].forEach(d=>C('移動',`${DW[a][s>0?1:0]}へ ${d} 移動`,`move translate ${A} ${w} ${a}`,()=>need().forEach(o=>o.position[a]+=s*d)))));
+/* 回転 */
+AX.forEach(([a,A,w])=>[-1,1].forEach(s=>[5,15,30,45,90,180].forEach(d=>C('回転',`${A}軸まわり ${sg(s*d)}度 回転`,`rotate turn 回す ${w}`,()=>need().forEach(o=>o.rotation[a]+=s*d*PI/180)))));
+/* 拡大縮小 */
+[[1.1,'10%大きく'],[1.25,'25%大きく'],[1.5,'1.5倍に'],[2,'2倍に'],[3,'3倍に'],[.9,'10%小さく'],[.75,'25%小さく'],[.5,'半分に'],[.25,'4分の1に'],[.1,'10分の1に']].forEach(([f,l])=>C('拡大縮小','全体を'+l,'scale size 大きく 小さく',()=>need().forEach(o=>o.scale.multiplyScalar(f))));
+AX.forEach(([a,A,w])=>{[[1.25,'25%伸ばす'],[2,'2倍に伸ばす'],[.8,'20%縮める'],[.5,'半分に縮める']].forEach(([f,l])=>C('拡大縮小',`${A}(${w})方向を${l}`,'stretch scale 伸ばす',()=>need().forEach(o=>o.scale[a]*=f)));
+ [.5,1,2,3,5].forEach(v=>C('拡大縮小',`${A}(${w})方向の大きさを ${v} にする`,'size 幅 高さ 奥行き 寸法',()=>need().forEach(o=>{o.geometry.computeBoundingBox();const z=o.geometry.boundingBox.getSize(new T.Vector3())[a]||1;o.scale[a]=v/z*Math.sign(o.scale[a]||1)})));
+ C('拡大縮小',`${A}(${w})方向に反転`,'flip mirror 反転 裏返す',()=>need().forEach(o=>o.scale[a]*=-1))});
+/* 配置 */
+C('配置','位置をリセット','reset position',()=>need().forEach(o=>o.position.set(0,0,0)));
+C('配置','回転をリセット','reset rotation',()=>need().forEach(o=>o.rotation.set(0,0,0)));
+C('配置','大きさをリセット','reset scale',()=>need().forEach(o=>o.scale.set(1,1,1)));
+C('配置','すべてリセット','reset all',()=>need().forEach(o=>{o.position.set(0,0,0);o.rotation.set(0,0,0);o.scale.set(1,1,1)}));
+C('配置','地面に置く','ground floor 接地',()=>need().forEach(o=>{o.position.y-=new T.Box3().setFromObject(o).min.y}));
+C('配置','原点へ移動','origin center',()=>need().forEach(o=>{o.position.x=0;o.position.z=0}));
+AX.forEach(([a,A,w])=>C('配置',`${A}=0 に揃える`,'align center 揃える',()=>need().forEach(o=>o.position[a]=0)));
+[.5,1,2].forEach(g=>C('配置',`位置を ${g} 刻みに整える`,'snap grid',()=>need().forEach(o=>['x','y','z'].forEach(a=>o.position[a]=Math.round(o.position[a]/g)*g))));
+[15,45,90].forEach(g=>C('配置',`角度を ${g}度 刻みに整える`,'snap angle',()=>need().forEach(o=>['x','y','z'].forEach(a=>o.rotation[a]=Math.round(o.rotation[a]/(g*PI/180))*g*PI/180))));
+/* 色 */
+[['赤','#e5383b'],['朱色','#ff6b35'],['橙','#ff9f1c'],['黄','#ffd60a'],['黄緑','#9ad43b'],['緑','#2fa84f'],['深緑','#1b6b3a'],['水色','#4cc9f0'],['青','#3a7bd5'],['紺','#1d3557'],['紫','#8e44ad'],['桃','#ff8fab'],['ピンク','#ff4d9d'],['茶','#8d5524'],['ベージュ','#e6d3b3'],['白','#f5f5f5'],['薄灰','#c8ccd2'],['灰','#8a8f98'],['濃灰','#4a4e57'],['黒','#16181d'],['金色','#e6b422'],['銀色','#c0c4cc'],['銅色','#b87333'],['ターコイズ','#2ec4b6'],['ラベンダー','#b8a1e3'],['サーモン','#fa8072'],['ミント','#98e8c1'],['レモン','#fff176'],['ワイン','#7b1e3a'],['空色','#87ceeb'],['肌色','#f2c9a0'],['草色','#6a994e']].forEach(([n,h])=>C('色',n+'色にする','color paint 色 '+h,()=>col(h)));
+C('色','ランダムな色にする','random color',()=>col('hsl('+Math.floor(Math.random()*360)+',65%,55%)'));
+C('色','1つずつ別の色にする','random each color 虹',()=>need().forEach(o=>setCol('hsl('+Math.floor(Math.random()*360)+',65%,55%)',[o])));
+C('色','明るくする','lighter bright',()=>need().forEach(o=>o.material.color.offsetHSL(0,0,.08)));
+C('色','暗くする','darker dark',()=>need().forEach(o=>o.material.color.offsetHSL(0,0,-.08)));
+/* 素材 */
+[0,.1,.25,.5,.75,1].forEach(v=>C('素材',`表面の粗さ ${v}`,'roughness つるつる ざらざら',()=>eM(m=>m.roughness=v)));
+[0,.25,.5,.75,1].forEach(v=>C('素材',`金属感 ${v}`,'metalness metal 金属',()=>eM(m=>m.metalness=v)));
+[.1,.25,.5,.75,1].forEach(v=>C('素材',`不透明度 ${v}`,'opacity transparent 透明 半透明',()=>eM(m=>{m.opacity=v;m.transparent=v<1;m.needsUpdate=true})));
+C('素材','ワイヤーフレーム切替','wireframe 網目',()=>eM(m=>m.wireframe=!m.wireframe));
+C('素材','フラットな面にする','flat shading 角ばる',()=>eM(m=>{m.flatShading=true;m.needsUpdate=true}));
+C('素材','なめらかな面にする','smooth shading',()=>eM(m=>{m.flatShading=false;m.needsUpdate=true}));
+[['発光なし',0],['弱く発光',.4],['強く発光',1.2]].forEach(([n,v])=>C('素材',n,'emissive glow 光る',()=>eM((m,o)=>{if(v)m.emissive.copy(m.color);else m.emissive.set(0);m.emissiveIntensity=v})));
+[['ガラス','#cfe9ff',.05,0,.35],['金','#e6b422',.25,1,1],['銀','#d0d3d8',.2,1,1],['銅','#b87333',.3,1,1],['クローム','#e8ecf2',.03,1,1],['ゴム','#25272c',.9,0,1],['プラスチック','#ff4d4d',.35,0,1],['粘土','#c9a27e',1,0,1],['木','#a0693a',.8,0,1],['石','#8b8f94',.95,0,1],['陶器','#f4f1ea',.15,0,1],['ネオン','#37f5ff',.4,0,1]].forEach(([n,c,r,mt,o])=>C('素材',n+'の質感にする','material preset 素材',()=>eM((m,ob)=>{m.color.set(c);m.roughness=r;m.metalness=mt;m.opacity=o;m.transparent=o<1;if(n=='ネオン'){m.emissive.set(c);m.emissiveIntensity=1.2}m.needsUpdate=true})));
+/* 変形 */
+const rad=v=>v.clone().normalize(),nz=v=>Math.sin(v.x*2.3+1.3)*Math.sin(v.y*2.9+.7)*Math.sin(v.z*2.1+2.1)+.5*Math.sin(v.x*5.1)*Math.sin(v.y*4.7+1)*Math.sin(v.z*5.3+2);
+function deform(f){need().forEach(o=>{if(o.userData.light)return;const g=o.geometry.clone();g.computeBoundingBox();const bb=g.boundingBox,p=g.attributes.position,v=new T.Vector3();for(let i=0;i<p.count;i++){v.fromBufferAttribute(p,i);f(v,bb);p.setXYZ(i,v.x,v.y,v.z)}p.needsUpdate=true;g.computeVertexNormals();g.computeBoundingBox();g.computeBoundingSphere();o.geometry=g})}
+const D=(n,k,f)=>C('変形',n,'deform 変形 '+k,()=>deform(f)),ht=(v,b)=>(v.y-b.min.y)/((b.max.y-b.min.y)||1);
+[.05,.1,.2,.4].forEach(a=>D(`ゴツゴツさせる 強さ${a}`,'noise bumpy 凸凹',v=>v.addScaledVector(rad(v),nz(v)*a)));
+[-.3,-.1,.1,.3].forEach(a=>D(`${a>0?'ふくらませる':'へこませる'} ${Math.abs(a)}`,'inflate 膨らませる',v=>v.addScaledVector(rad(v),a)));
+[-180,-90,-45,45,90,180].forEach(d=>D(`ねじる ${sg(d)}度`,'twist 捻る',(v,b)=>v.applyAxisAngle(Y,d*PI/180*ht(v,b))));
+[[.3,'少し'],[.6,'強く'],[-.3,'逆向きに']].forEach(([k,l])=>D(`先を細くする (${l})`,'taper 先細り',(v,b)=>{const s=1-k*ht(v,b);v.x*=s;v.z*=s}));
+[.1,.3].forEach(a=>D(`波打たせる ${a}`,'wave 波',v=>{v.y+=Math.sin(v.x*3+v.z*2)*a}));
+D('上下につぶす','flatten squash',v=>{v.y*=.5});
+[.5,1].forEach(t=>D(`球に近づける ${t}`,'spherify round 丸く',(v,b)=>v.lerp(rad(v).multiplyScalar((b.max.x-b.min.x)/2||.5),t)));
+/* 編集 */
+C('編集','複製','duplicate copy コピー',()=>{const n=need().map(o=>dup(o,new T.Vector3(.6,0,.6)));sel=n});
+C('編集','削除','delete remove 消す',del);
+C('編集','すべて選択','select all',()=>{sel=objs.filter(o=>o.visible)},1);
+C('編集','選択を解除','deselect none',()=>{sel=[]},1);
+C('編集','選択を反転','invert selection',()=>{sel=objs.filter(o=>!sel.includes(o))},1);
+C('編集','次の物体を選ぶ','next select',()=>{if(objs.length)sel=[objs[(objs.indexOf(sel[sel.length-1])+1)%objs.length]]},1);
+C('編集','前の物体を選ぶ','previous select',()=>{if(objs.length)sel=[objs[(objs.indexOf(sel[0])-1+objs.length)%objs.length]]},1);
+C('編集','非表示にする','hide',()=>need().forEach(o=>o.visible=false));
+C('編集','すべて表示する','show all',()=>objs.forEach(o=>o.visible=true));
+C('編集','選択以外を隠す','isolate hide others',()=>{need();objs.forEach(o=>o.visible=sel.includes(o))});
+C('編集','名前を変更','rename',()=>{const o=need()[sel.length-1],n=prompt('新しい名前',o.name);if(n)o.name=n});
+C('編集','元に戻す','undo',undo,1);
+C('編集','やり直す','redo',redo,1);
+C('編集','ランダムに回す (縦軸)','random rotate',()=>need().forEach(o=>o.rotation.y=Math.random()*S2));
+C('編集','ランダムな大きさにする','random scale',()=>need().forEach(o=>o.scale.multiplyScalar(.6+Math.random()*.9)));
+C('編集','ランダムに散らす','random position',()=>need().forEach(o=>{o.position.x+=Math.random()*6-3;o.position.z+=Math.random()*6-3}));
+/* 複製・配列 */
+AX.forEach(([a,A,w])=>[3,5,10].forEach(n=>C('編集',`${A}(${w})方向に ${n} 個並べる`,'array repeat 配列 並べる',()=>{const add=[];need().slice().forEach(o=>{const g=bs(o)[a]*1.15;for(let i=1;i<n;i++)add.push(dup(o,V(a,g*i)))});sel=sel.concat(add)})));
+[4,6,8,12,16,24].forEach(n=>C('編集',`円形に ${n} 個並べる`,'circular array 円 並べる',()=>{const add=[];need().slice().forEach(o=>{if(Math.hypot(o.position.x,o.position.z)<.01)o.position.x=3;for(let i=1;i<n;i++){const c=dup(o),a=S2*i/n;c.position.applyAxisAngle(Y,a);c.rotation.y+=a;add.push(c)}});sel=sel.concat(add);toast('原点を中心に並べました')}));
+[3,5].forEach(n=>C('編集',`${n}x${n} の格子に並べる`,'grid array 格子',()=>{const add=[];need().slice().forEach(o=>{const s=bs(o),gx=s.x*1.15,gz=s.z*1.15;for(let i=0;i<n;i++)for(let j=0;j<n;j++)if(i||j)add.push(dup(o,new T.Vector3(gx*i,0,gz*j)))});sel=sel.concat(add)}));
+AX.forEach(([a,A,w])=>C('編集',`${A}(${w})方向に鏡写しで複製`,'mirror 鏡',()=>{const add=need().map(o=>{const c=dup(o);c.position[a]*=-1;c.scale[a]*=-1;['x','y','z'].filter(k=>k!=a).forEach(k=>c.rotation[k]*=-1);return c});sel=sel.concat(add)}));
+[5,20,50].forEach(n=>C('編集',`ランダムに ${n} 個ばらまく`,'scatter random 散らす',()=>{const add=[];need().slice().forEach(o=>{for(let i=0;i<n;i++){const c=dup(o),k=.6+Math.random()*.8;c.scale.multiplyScalar(k);c.position.set(Math.random()*14-7,o.position.y*k,Math.random()*14-7);c.rotation.y=Math.random()*S2;add.push(c)}});sel=sel.concat(add)}));
+/* ライト */
+[['点光源 (白)','p','#ffffff'],['点光源 (暖色)','p','#ffc27a'],['点光源 (寒色)','p','#9cc8ff'],['点光源 (赤)','p','#ff4d4d'],['点光源 (緑)','p','#4dff88'],['点光源 (青)','p','#4d7dff'],['スポットライト (白)','s','#ffffff'],['スポットライト (暖色)','s','#ffc27a'],['太陽光 (白)','d','#ffffff'],['太陽光 (暖色)','d','#ffd9a0']].forEach(([n,k,c])=>C('ライト',n+'を追加','light add 照明',()=>addLight(k,c)));
+[[1.5,'1.5倍に明るく'],[2,'2倍に明るく'],[.67,'少し暗く'],[.5,'半分に暗く']].forEach(([f,l])=>C('ライト','選んだライトを'+l,'light intensity 明るさ',()=>{const L=need().filter(o=>o.userData.light);if(!L.length)throw Error('ライトを選んでください');L.forEach(o=>o.userData.light.intensity*=f)}));
+C('ライト','選んだライトを消灯','light off',()=>need().forEach(o=>o.userData.light&&(o.userData.light.visible=false)));
+C('ライト','選んだライトを点灯','light on',()=>need().forEach(o=>o.userData.light&&(o.userData.light.visible=true)));
+/* シーン */
+[['グレー','#2b3144'],['黒','#0b0d12'],['白','#f2f4f8'],['空色','#8ec9ee'],['夕焼け','#f0a46b'],['夜空','#10162e'],['草原','#6b9a62'],['青','#2d5bd1'],['ピンク','#f4a6c0'],['紫','#4a3a7a'],['ベージュ','#e6d9c2'],['深緑','#1c3a2e']].forEach(([n,h])=>C('シーン','背景を'+n+'に','background 背景色',()=>{bg=h;scene.background=new T.Color(h);if(scene.fog)scene.fog.color.set(h)},1));
+[['近め',6,24],['ふつう',12,40],['遠め',20,70]].forEach(([n,a,b])=>C('シーン','霧をつける ('+n+')','fog 霧',()=>{scene.fog=new T.Fog(bg,a,b);dirty()},1));
+C('シーン','霧を消す','fog off',()=>{scene.fog=null;dirty()},1);
+C('シーン','グリッド表示切替','grid toggle',()=>{grid.visible=!grid.visible},1);
+C('シーン','座標軸表示切替','axes toggle',()=>{axes.visible=!axes.visible},1);
+C('シーン','地面の影切替','floor shadow toggle',()=>{floor.visible=!floor.visible},1);
+[0,.4,.9,1.5,2.2].forEach(v=>C('シーン',`太陽光の強さ ${v}`,'sun intensity',()=>{sun.intensity=v},1));
+[-30,30].forEach(d=>C('シーン',`太陽の向きを ${sg(d)}度`,'sun rotate 影の向き',()=>sun.position.applyAxisAngle(Y,d*PI/180),1));
+[['高く',1.3],['低く',.75]].forEach(([n,f])=>C('シーン','太陽の位置を'+n,'sun height',()=>{sun.position.y*=f},1));
+[0,.3,.75,1.2].forEach(v=>C('シーン',`全体の明るさ ${v}`,'ambient light 環境光',()=>{amb.intensity=v},1));
+[.5,.8,1,1.3,1.8].forEach(v=>C('シーン',`露出 ${v}`,'exposure 露出',()=>{R.toneMappingExposure=v;R.toneMapping=T.LinearToneMapping;dirty()},1));
+C('シーン','すべて削除','clear all',()=>{objs.forEach(o=>scene.remove(o));objs=[];sel=[]});
+/* カメラ */
+[['正面',0,PI/2],['背面',PI,PI/2],['右',PI/2,PI/2],['左',-PI/2,PI/2],['真上',cs.th,.001],['真下',cs.th,PI-.001],['斜め (初期)',.8,1.1]].forEach(([n,t,p])=>C('カメラ',n+'から見る','view camera 視点',()=>{cs.th=t;cs.ph=p},1));
+[['拡大',.8],['縮小',1.25],['大きく拡大',.5],['大きく縮小',2]].forEach(([n,f])=>C('カメラ','視点を'+n,'zoom ズーム',()=>{cs.r=clamp(cs.r*f,1,80)},1));
+[['左',-1,0],['右',1,0],['上',0,1],['下',0,-1]].forEach(([n,a,b])=>[15,45].forEach(d=>C('カメラ',`視点を${n}へ ${d}度回す`,'orbit 回り込む',()=>{cs.th+=a*d*PI/180;cs.ph=clamp(cs.ph-b*d*PI/180,.05,PI-.05)},1)));
+[['左',-1,0],['右',1,0],['上',0,1],['下',0,-1]].forEach(([n,a,b])=>[.5,2].forEach(d=>C('カメラ',`視点を${n}へ ${d} 平行移動`,'pan 移動',()=>{const r=new T.Vector3().setFromMatrixColumn(cam.matrix,0),u=new T.Vector3().setFromMatrixColumn(cam.matrix,1);cs.t.addScaledVector(r,a*d).addScaledVector(u,b*d)},1)));
+function frame(list){const b=new T.Box3();(list.length?list:objs).forEach(o=>b.expandByObject(o));if(b.isEmpty())return;const s=b.getSize(new T.Vector3()).length();b.getCenter(cs.t);cs.r=Math.max(3,s*1.1)}
+C('カメラ','選んだ物体を画面に収める','frame selected focus',()=>frame(need()),1);
+C('カメラ','全体を画面に収める','frame all',()=>frame([]),1);
+[20,35,50,75,100].forEach(v=>C('カメラ',`画角 ${v}度`,'fov lens 広角 望遠',()=>{cam.fov=v;cam.updateProjectionMatrix()},1));
+[['ゆっくり回す',.3],['ふつうに回す',.7],['速く回す',1.6],['回転を止める',0]].forEach(([n,v])=>C('カメラ','ターンテーブル: '+n,'turntable auto rotate 自動回転',()=>{turn=v},1));
+/* 書き出し */
+function shot(s,tr){const w=vp.clientWidth,h=vp.clientHeight,k=Math.min(s,8192/Math.max(w,h)),hid=[grid,axes,GZ,...BH],vis=hid.map(x=>x.visible),ob=scene.background;
+ hid.forEach(x=>x.visible=false);if(tr)scene.background=null;R.setPixelRatio(k);R.render(scene,cam);const url=cv.toDataURL('image/png');
+ scene.background=ob;hid.forEach((x,i)=>x.visible=vis[i]);R.setPixelRatio(devicePixelRatio);
+ $('#pimg').src=url;$('#pd').href=url;$('#pz').textContent=Math.round(w*k)+' x '+Math.round(h*k)+' px';$('#pv').classList.add('on')}
+[[1,'標準'],[2,'2倍'],[4,'4倍']].forEach(([s,l])=>[0,1].forEach(t=>C('書き出し',`PNG ${l}${t?' (背景透明)':''}`,'export png save 画像 保存 ダウンロード',()=>shot(s,t),1)));
+/* テンプレート */
+const W='#f4f7fb',DK='#222831',PAL=['#ff6b6b','#ffa94d','#ffd43b','#69db7c','#4dabf7','#9775fa'];
+const TPL=[
+['雪だるま',()=>{put('sph',[0,.7,0],[1.4,1.4,1.4],W);put('sph',[0,1.75,0],[1,1,1],W);put('sph',[0,2.5,0],[.7,.7,.7],W);put('sph',[0,2.5,.38],[.12,.12,.45],'#ff8a2b');put('sph',[-.15,2.62,.3],[.1,.1,.1],DK);put('sph',[.15,2.62,.3],[.1,.1,.1],DK);put('cyl',[0,2.95,0],[.5,.35,.5],DK)}],
+['カラフルなタワー',()=>{for(let i=0;i<6;i++)put('box',[0,.4+i*.8,0],[3-i*.45,.8,3-i*.45],PAL[i])}],
+['階段',()=>{for(let i=0;i<8;i++)put('box',[0,(i+1)*.2,-i*.8],[3,(i+1)*.4,.8],i%2?'#d9dee8':'#aab3c5')}],
+['テーブルと椅子',()=>{const wd='#a0693a';put('box',[0,1.05,0],[3,.15,1.8],wd);[[-1.3,-.75],[1.3,-.75],[-1.3,.75],[1.3,.75]].forEach(p=>put('box',[p[0],.5,p[1]],[.15,1,.15],wd));put('box',[0,.6,1.9],[1,.12,1],'#4dabf7');[[-.4,1.5],[.4,1.5],[-.4,2.3],[.4,2.3]].forEach(p=>put('box',[p[0],.27,p[1]],[.1,.54,.1],'#3b82c4'));put('box',[0,1.1,2.35],[1,.9,.1],'#4dabf7')}],
+['木',()=>{put('cyl',[0,.75,0],[.4,1.5,.4],'#8d5524');put('cone',[0,2,0],[2,1.6,2],'#2f9e5a');put('cone',[0,3,0],[1.6,1.4,1.6],'#37b36a');put('cone',[0,3.8,0],[1.1,1.2,1.1],'#45c77a')}],
+['家',()=>{put('box',[0,1,0],[3.4,2,3.4],'#f1e4cf');put('pyr',[0,2.8,0],[4.8,1.6,4.8],'#b5473a',PI/4);put('box',[0,.65,1.72],[.7,1.3,.08],'#8d5524');put('box',[-1,1.2,1.72],[.6,.6,.08],'#8ec9ee');put('box',[1,1.2,1.72],[.6,.6,.08],'#8ec9ee')}],
+['ミニ街並み',()=>{for(let i=0;i<9;i++){const h=1+((i*7)%5)*.8;put('box',[(i%3-1)*2.2,h/2,(Math.floor(i/3)-1)*2.2],[1.6,h,1.6],['#9aa5b8','#c8ced8','#7f8ea3'][i%3])}}],
+['ドミノ倒し',()=>{for(let i=0;i<12;i++)put('box',[(i-5.5)*.9,.6,0],[.25,1.2,.8],PAL[i%6],i*.04)}],
+['太陽系',()=>{put('sph',[0,1.5,0],[2,2,2],'#ffd43b').material.emissive.set('#ffb000');[[2.5,.5,'#adb5bd'],[3.6,.8,'#ffa94d'],[4.9,.9,'#4dabf7'],[6.3,.7,'#ff6b6b']].forEach(p=>put('sph',[p[0],1.5,0],[p[1],p[1],p[1]],p[2]));put('ring',[3.6,1.5,0],[1.8,.12,1.8],'#e6d3b3')}],
+['ロボット',()=>{put('box',[0,1.6,0],[1.4,1.6,.9],'#7f8ea3');put('box',[0,2.9,0],[1,.8,.8],'#c8ced8');[-.25,.25].forEach(x=>put('box',[x,2.95,.42],[.2,.2,.1],'#37f5ff').material.emissive.set('#37f5ff'));put('cyl',[0,3.5,0],[.06,.4,.06],'#4a4e57');[-.95,.95].forEach(x=>put('cyl',[x,1.7,0],[.25,1.3,.25],'#aab3c5'));[-.35,.35].forEach(x=>put('box',[x,.4,0],[.4,.8,.5],'#4a4e57'))}]
+];
+TPL.forEach(([n,f])=>C('テンプレート',n+'をつくる','template sample テンプレ 例',()=>{const k=objs.length;f();sel=objs.slice(k);frame(sel)}));
+/* ---------- 切断・結合・整列・生成 ---------- */
+const isCut=o=>o.userData.kind=='pla'||o.userData.kind=='circ',AXN={x:new T.Vector3(1,0,0),y:Y,z:new T.Vector3(0,0,1)},bb=o=>new T.Box3().setFromObject(o);
+function welder(tol){const pts=[],h=new Map();return{pts,id(p){const c=[p.x,p.y,p.z].map(v=>Math.floor(v/tol));for(let i=-1;i<2;i++)for(let j=-1;j<2;j++)for(let k=-1;k<2;k++){const l=h.get((c[0]+i)+','+(c[1]+j)+','+(c[2]+k));if(l)for(const q of l)if(pts[q].distanceToSquared(p)<tol*tol)return q}const q=pts.length,key=c.join(',');pts.push(p.clone());if(!h.has(key))h.set(key,[]);h.get(key).push(q);return q}}}
+const world=o=>{o.updateMatrixWorld(true);const g=o.geometry.index?o.geometry.toNonIndexed():o.geometry.clone();g.applyMatrix4(o.matrixWorld);if(o.matrixWorld.determinant()<0)swapW(g);return g};
+function geo(P,N,Cc){const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(P,3));g.setAttribute('normal',new T.Float32BufferAttribute(N,3));if(Cc)g.setAttribute('color',new T.Float32BufferAttribute(Cc,3));g.computeBoundingBox();return g}
+function solid(g,name,mat){const c=g.boundingBox.getCenter(new T.Vector3());g.translate(-c.x,-c.y,-c.z);g.computeBoundingBox();g.computeBoundingSphere();mat.vertexColors=!!g.attributes.color;const m=new T.Mesh(g,mat);m.name=name+' '+(++cnt);m.castShadow=m.receiveShadow=true;m.position.copy(c);return m}
+/* 平面 (法線 n、通過点 p0) で三角形メッシュを切る。上側・下側の三角形と断面の三角形を返す */
+function sliceObj(o,n,p0){
+ const g=world(o),pa=g.attributes.position,na=g.attributes.normal,d0=-n.dot(p0),ca=g.attributes.color,U={P:[],N:[],C:[]},L={P:[],N:[],C:[]},W=welder(1e-4),segs=[];
+ const vt=i=>{const p=new T.Vector3().fromBufferAttribute(pa,i);let d=n.dot(p)+d0;if(Math.abs(d)<1e-6)d=1e-6;return{p,n:na?new T.Vector3().fromBufferAttribute(na,i):n.clone(),c:ca?new T.Vector3().fromBufferAttribute(ca,i):null,d}};
+ const clip=(poly,up)=>{const r=[];poly.forEach((a,i)=>{const b=poly[(i+1)%poly.length],ia=(a.d>0)==up,ib=(b.d>0)==up;if(ia)r.push(a);if(ia!=ib){const t=a.d/(a.d-b.d);r.push({p:a.p.clone().lerp(b.p,t),n:a.n.clone().lerp(b.n,t).normalize(),d:0,x:1,c:a.c&&a.c.clone().lerp(b.c,t)})}});return r};
+ const emit=(S,q)=>{for(let i=1;i<q.length-1;i++)[q[0],q[i],q[i+1]].forEach(v=>{S.P.push(v.p.x,v.p.y,v.p.z);S.N.push(v.n.x,v.n.y,v.n.z);if(v.c)S.C.push(v.c.x,v.c.y,v.c.z)})};
+ for(let i=0;i<pa.count;i+=3){const t=[vt(i),vt(i+1),vt(i+2)],a=t.filter(v=>v.d>0).length;
+  if(a==3)emit(U,t);else if(a==0)emit(L,t);else{const u=clip(t,true);emit(U,u);emit(L,clip(t,false));const x=u.filter(v=>v.x);if(x.length==2){const A=W.id(x[0].p),B=W.id(x[1].p);if(A!=B)segs.push([A,B])}}}
+ const adj={},used={},loops=[];segs.forEach(([a,b],k)=>{(adj[a]=adj[a]||[]).push([b,k]);(adj[b]=adj[b]||[]).push([a,k])});
+ segs.forEach(([a,b],k)=>{if(used[k])return;used[k]=1;const lp=[a];let c=b;while(c!=a&&c!=null){lp.push(c);const nx=(adj[c]||[]).find(e=>!used[e[1]]);if(!nx){c=null;break}used[nx[1]]=1;c=nx[0]}if(c==a&&lp.length>2)loops.push(lp)});
+ const ct=[],cen=new T.Vector3();let ar=0;
+ if(loops.length){const u=(Math.abs(n.y)<.9?new T.Vector3(0,1,0):new T.Vector3(1,0,0)).cross(n).normalize(),v=n.clone().cross(u),
+  L2=loops.map(l=>l.map(i=>new T.Vector2(W.pts[i].dot(u),W.pts[i].dot(v)))),
+  ins=(pt,l)=>{let c=false;for(let i=0,j=l.length-1;i<l.length;j=i++){const a=l[i],b=l[j];if((a.y>pt.y)!=(b.y>pt.y)&&pt.x<(b.x-a.x)*(pt.y-a.y)/(b.y-a.y)+a.x)c=!c}return c},
+  par=L2.map((l,i)=>L2.reduce((r,m,j)=>(j!=i&&ins(l[0],m)&&r.push(j),r),[]));
+  L2.forEach((l,i)=>{if(par[i].length%2)return;const hs=L2.map((_,j)=>j).filter(j=>par[j].length==par[i].length+1&&par[j].includes(i)),ids=[...loops[i],...hs.flatMap(j=>loops[j])];
+   T.ShapeUtils.triangulateShape(l.map(q=>q.clone()),hs.map(j=>L2[j].map(q=>q.clone()))).forEach(t=>{const P=t.map(k=>W.pts[ids[k]]),a=P[1].clone().sub(P[0]).cross(P[2].clone().sub(P[0])).length()/2;ar+=a;cen.addScaledVector(P[0].clone().add(P[1]).add(P[2]).divideScalar(3),a);ct.push(P)})})}
+ if(ar)cen.divideScalar(ar);
+ return{U,L,ct,cen,ar}}
+function piece(o,S,r,capN,tag){if(S.P.length<9)return null;const P=S.P.slice(),N=S.N.slice(),Cl=S.C.slice();
+ r.ct.forEach(t=>{let[a,b,c]=t;if(b.clone().sub(a).cross(c.clone().sub(a)).dot(capN)<0)[b,c]=[c,b];[a,b,c].forEach(v=>{P.push(v.x,v.y,v.z);N.push(capN.x,capN.y,capN.z);if(Cl.length)Cl.push(1,1,1)})});
+ const m=solid(geo(P,N,Cl.length?Cl:null),o.name.replace(/ \d+$/,'')+tag,o.material.clone());if(r.ct.length)m.userData.cap={c:r.cen.clone().sub(m.position).toArray(),n:capN.toArray()};return m}
+function doSlice(tg,n,p0,mode,off){const out=[],gone=[];
+ tg.forEach(o=>{const r=sliceObj(o,n,p0),nm=o.name.replace(/ \d+$/,'');
+  if(mode=='sec'){if(r.ct.length){const P=[],N=[];r.ct.forEach(t=>t.forEach(v=>{P.push(v.x,v.y,v.z);N.push(n.x,n.y,n.z)}));const m=solid(geo(P,N),nm+'(断面)',o.material.clone());m.userData.cap={c:r.cen.clone().sub(m.position).toArray(),n:n.toArray()};out.push(reg(m))}return}
+  const U=piece(o,r.U,r,n.clone().negate(),'(上)'),L=piece(o,r.L,r,n,'(下)');if(!U||!L)return;
+  gone.push(o);if(mode!='dn'){reg(U);out.push(U)}if(mode!='up'){reg(L);out.push(L)}if(mode=='both'&&off){U.position.addScaledVector(n,off/2);L.position.addScaledVector(n,-off/2)}});
+ gone.forEach(o=>scene.remove(o));objs=objs.filter(o=>!gone.includes(o));return out}
+const cutSel=()=>{const s=need(),c=s.find(isCut);if(!c)throw Error('切断面になる平面を一緒に選んでください。先に「切断用の平面を追加」を実行すると自動で選ばれます');const tg=s.filter(o=>o!=c&&!isCut(o)&&!o.userData.light);if(!tg.length)throw Error('切られる物体も一緒に選んでください (Shiftを押しながらクリック)');c.updateMatrixWorld(true);return{c,tg,n:new T.Vector3(0,1,0).transformDirection(c.matrixWorld),p:c.getWorldPosition(new T.Vector3())}};
+const sl=(mode,off)=>{const{tg,n,p}=cutSel(),r=doSlice(tg,n,p,mode,off||0);if(!r.length)throw Error('平面が物体に当たっていません。平面を動かしてみてください');sel=r};
+function addCutter(n){const t=sel.filter(o=>!o.userData.light&&!isCut(o)),b=new T.Box3();(t.length?t:objs).forEach(o=>b.expandByObject(o));if(b.isEmpty())b.set(new T.Vector3(-1,0,-1),new T.Vector3(1,2,1));
+ const c=b.getCenter(new T.Vector3()),s=Math.max(...b.getSize(new T.Vector3()).toArray())*1.5+1,m=mk(G.pla[1](),'切断面','#3ddbbd');
+ m.userData.kind='pla';m.scale.set(s/3,1,s/3);m.position.copy(c);m.quaternion.setFromUnitVectors(Y,n.clone().normalize());Object.assign(m.material,{transparent:true,opacity:.35,depthWrite:false});m.castShadow=false;reg(m);sel=[...t,m];toast('平面を動かして「平面で切る」を実行。平面は無限に広がる面として使われます')}
+function splitAxis(a,fr,off){const t=need().filter(o=>!o.userData.light&&!isCut(o));if(!t.length)throw Error('切る物体を選んでください');const all=[];
+ t.forEach(o=>{const b=bb(o);let list=[o];fr.forEach(f=>{const pos=b.min[a]+(b.max[a]-b.min[a])*f,nl=[];list.forEach(q=>{const r=doSlice([q],AXN[a],V(a,pos),'both',0);nl.push(...(r.length?r:[q]))});list=nl});
+  list.sort((x,y)=>x.position[a]-y.position[a]).forEach((q,i)=>q.position[a]+=i*off);all.push(...list)});sel=all}
+/* 切断 */
+AX.forEach(([a,A,w])=>C('切断',`切断用の平面を追加: ${w}を分ける (${A}軸に垂直)`,'plane cutter slice 切る 平面 追加',()=>addCutter(AXN[a])));
+[['X-Y',[1,1,0]],['Y-Z',[0,1,1]],['X-Z',[1,0,1]]].forEach(([n,v])=>C('切断',`切断用の平面を追加: 斜め45度 (${n})`,'plane cutter diagonal 斜め',()=>addCutter(new T.Vector3(...v))));
+C('切断','平面で切る (上下に分ける)','slice cut 切断 スライス 分割',()=>sl('both'));
+[.2,.5,1,2].forEach(d=>C('切断',`平面で切って ${d} 離す`,'slice cut separate 離す',()=>sl('both',d)));
+C('切断','平面で切って上側だけ残す','slice keep upper 上側 残す',()=>sl('up'));
+C('切断','平面で切って下側だけ残す','slice keep lower 下側 残す',()=>sl('dn'));
+C('切断','断面だけ取り出す','cross section 断面 取り出す',()=>sl('sec'));
+C('切断','断面積を調べる','cross section area 断面積',()=>{const{tg,n,p}=cutSel();toast('断面積: '+tg.reduce((s,o)=>s+sliceObj(o,n,p).ar,0).toFixed(3))},1);
+AX.forEach(([a,A,w])=>{C('切断',`${A}(${w})方向の中央で切る`,'slice center 中央 半分',()=>splitAxis(a,[.5],0));
+ [.2,1].forEach(d=>C('切断',`${A}(${w})方向の中央で切って ${d} 離す`,'slice center separate 離す',()=>splitAxis(a,[.5],d)));
+ [.25,.75].forEach(f=>C('切断',`${A}(${w})方向の ${f*100}% の位置で切る`,'slice position 位置',()=>splitAxis(a,[f],0)));
+ [3,4,5,8,10].forEach(n=>C('切断',`${A}(${w})方向に ${n} 等分にスライス`,'slice equal divide 等分 輪切り',()=>splitAxis(a,[...Array(n-1)].map((_,i)=>(i+1)/n),0)))});
+const cuts=f=>{const c=sel.filter(isCut);if(!c.length)throw Error('切断用の平面を選んでください');c.forEach(f)};
+[-1,1].forEach(s=>[.1,.5,1].forEach(d=>C('切断',`切断面を法線方向に ${sg(s*d)} 動かす`,'plane move 平面 動かす',()=>cuts(c=>{c.updateMatrixWorld(true);c.position.addScaledVector(new T.Vector3(0,1,0).transformDirection(c.matrixWorld),s*d)}))));
+[['X','x'],['Z','z']].forEach(([A,a])=>[-90,-45,-15,15,45,90].forEach(d=>C('切断',`切断面を${A}軸まわりに ${sg(d)}度 傾ける`,'plane tilt rotate 傾ける',()=>cuts(c=>c['rotate'+A](d*PI/180)))));
+C('切断','切断面の表裏を反転','plane flip 反転',()=>cuts(c=>c.rotateX(PI)));
+C('切断','切断面を選んだ物体の中心へ','plane center 中心',()=>{const c=sel.find(isCut),t=sel.filter(o=>o!=c&&!isCut(o)&&!o.userData.light);if(!c||!t.length)throw Error('切断面と物体を一緒に選んでください');const b=new T.Box3();t.forEach(o=>b.expandByObject(o));c.position.copy(b.getCenter(new T.Vector3()))});
+/* 結合 */
+function merge(list,name){const cols=new Set(list.map(o=>o.material.color.getHex())),multi=cols.size>1||list.some(o=>o.geometry.attributes.color),P=[],N=[],Cc=[];
+ list.forEach(o=>{const g=world(o),p=g.attributes.position,q=g.attributes.normal.array,ca=g.attributes.color,c=o.material.color;for(let i=0;i<p.array.length;i++){P.push(p.array[i]);N.push(q[i])}if(multi)for(let i=0;i<p.count;i++)ca?Cc.push(ca.getX(i),ca.getY(i),ca.getZ(i)):Cc.push(c.r,c.g,c.b)});
+ const m=solid(geo(P,N,multi?Cc:null),name,list[0].material.clone());if(multi)m.material.color.set('#ffffff');list.forEach(o=>scene.remove(o));objs=objs.filter(o=>!list.includes(o));return reg(m)}
+function separate(o){const g=world(o),pa=g.attributes.position,na=g.attributes.normal,W=welder(1e-5),id=[],par={},grp={};
+ for(let i=0;i<pa.count;i++)id.push(W.id(new T.Vector3().fromBufferAttribute(pa,i)));
+ const f=x=>{if(par[x]===undefined)par[x]=x;let r=x;while(par[r]!==r)r=par[r];while(par[x]!==r){const t=par[x];par[x]=r;x=t}return r};
+ for(let i=0;i<id.length;i+=3){const ra=f(id[i]);[1,2].forEach(k=>{const rb=f(id[i+k]);if(rb!=ra)par[rb]=ra})}
+ for(let i=0;i<id.length;i+=3){const r=f(id[i]),S=grp[r]=grp[r]||{P:[],N:[]};for(let k=0;k<3;k++){S.P.push(pa.getX(i+k),pa.getY(i+k),pa.getZ(i+k));S.N.push(na.getX(i+k),na.getY(i+k),na.getZ(i+k))}}
+ const ks=Object.keys(grp);if(ks.length<2)return[];scene.remove(o);objs=objs.filter(x=>x!=o);return ks.map(k=>reg(solid(geo(grp[k].P,grp[k].N),o.name.replace(/ \d+$/,'')+'(パーツ)',o.material.clone())))}
+const mergeable=()=>need().filter(o=>!o.userData.light&&!isCut(o));
+C('結合','選んだ物体を1つに結合','merge join combine まとめる',()=>{const l=mergeable();if(l.length<2)throw Error('2つ以上選んでください');sel=[merge(l,'結合')]});
+C('結合','つながっていない部分をバラバラに分離','separate split parts 分離',()=>{const r=mergeable().flatMap(separate);if(!r.length)throw Error('分離できる部分がありません');sel=r});
+const capW=o=>{const c=o.userData.cap;if(!c)throw Error('断面の情報がありません。「平面で切る」で作った物体を選んでください');o.updateMatrixWorld(true);return{p:new T.Vector3(...c.c).applyMatrix4(o.matrixWorld),n:new T.Vector3(...c.n).applyNormalMatrix(new T.Matrix3().getNormalMatrix(o.matrixWorld)).normalize()}};
+function joinCaps(rot){const s=need();if(s.length!=2)throw Error('断面をくっつける物体を2つ選んでください (最初に選んだ方は動きません)');const A=capW(s[0]),B=s[1];if(rot)B.quaternion.premultiply(new T.Quaternion().setFromUnitVectors(capW(B).n,A.n.clone().negate()));B.position.add(A.p.clone().sub(capW(B).p))}
+C('結合','断面どうしを向きごと貼り合わせる','join cross section 貼り合わせ 断面 くっつける',()=>joinCaps(true));
+C('結合','断面の位置だけ合わせる (向きはそのまま)','join position 断面 位置合わせ',()=>joinCaps(false));
+C('結合','断面を貼り合わせて1つに結合','join merge 断面 貼り合わせ 結合',()=>{joinCaps(true);sel=[merge(sel.slice(),'結合')]});
+[90,180,-90].forEach(d=>C('結合',`貼り合わせた物体を断面まわりに ${sg(d)}度 回す`,'join rotate 断面 回す',()=>{const s=need();if(s.length!=2)throw Error('貼り合わせた2つを選んでください (最初が基準)');const A=capW(s[0]),q=new T.Quaternion().setFromAxisAngle(A.n,d*PI/180);s[1].position.sub(A.p).applyQuaternion(q).add(A.p);s[1].quaternion.premultiply(q)}));
+[['下向きにして地面に置く',[0,-1,0],1],['上向き',[0,1,0]],['右向き',[1,0,0]],['左向き',[-1,0,0]],['手前向き',[0,0,1]],['奥向き',[0,0,-1]]].forEach(([n,v,gr])=>C('結合','断面を'+n+'にする','cap face direction 断面 向き',()=>need().forEach(o=>{const c=capW(o);o.quaternion.premultiply(new T.Quaternion().setFromUnitVectors(c.n,new T.Vector3(...v)));if(gr)o.position.y-=bb(o).min.y})));
+/* 整列 */
+const ref=()=>{const s=need();if(s.length<2)throw Error('2つ以上選んでください (最初に選んだ物体が基準)');return[bb(s[0]),s.slice(1)]};
+AX.forEach(([a,A,w])=>{[1,-1].forEach(s=>C('整列',`最初の物体の${DW[a][s>0?1:0]}にくっつける`,'touch abut 隣 接する 載せる',()=>{const[R,l]=ref();l.forEach(o=>{const B=bb(o),d=R.getCenter(new T.Vector3()).sub(B.getCenter(new T.Vector3()));d[a]=s>0?R.max[a]-B.min[a]:R.min[a]-B.max[a];o.position.add(d)})}));
+ [['min','小さい側の端'],['max','大きい側の端'],['c','中心']].forEach(([m,l])=>C('整列',`${A}(${w})方向: 最初の物体に${l}を揃える`,'align 揃える',()=>{const[R,s]=ref(),g=b=>m=='c'?b.getCenter(new T.Vector3())[a]:b[m][a];s.forEach(o=>o.position[a]+=g(R)-g(bb(o)))}));
+ C('整列',`${A}(${w})方向に等間隔に並べる`,'distribute 等間隔',()=>{const s=need().slice().sort((p,q)=>p.position[a]-q.position[a]);if(s.length<3)throw Error('3つ以上選んでください');const f=s[0].position[a],e=s[s.length-1].position[a];s.forEach((o,i)=>o.position[a]=f+(e-f)*i/(s.length-1))});
+ C('整列',`${A}(${w})方向に隙間なく一列に並べる`,'line stack 積み上げ 一列',()=>{const s=need().slice().sort((p,q)=>bb(p).getCenter(new T.Vector3())[a]-bb(q).getCenter(new T.Vector3())[a]);let cur=bb(s[0]).min[a];s.forEach(o=>{const b=bb(o);o.position[a]+=cur-b.min[a];cur+=b.max[a]-b.min[a]})})});
+C('整列','向きを最初の物体に合わせる','match rotation',()=>{const s=need();s.slice(1).forEach(o=>o.quaternion.copy(s[0].quaternion))});
+C('整列','大きさを最初の物体に合わせる','match size',()=>{const[R,s]=ref(),z=R.getSize(new T.Vector3());s.forEach(o=>{const b=bb(o).getSize(new T.Vector3());['x','y','z'].forEach(a=>{if(b[a])o.scale[a]*=z[a]/b[a]})})});
+[['形状の中心','center'],['底面の中心','base'],['世界の原点','world']].forEach(([n,m])=>C('整列',`物体の基準点を${n}に移す`,'origin pivot 原点 基準点',()=>need().forEach(o=>{if(o.userData.light)return;o.updateMatrixWorld(true);const b=bb(o),t=b.getCenter(new T.Vector3());if(m=='base')t.y=b.min.y;if(m=='world')t.set(0,0,0);const l=o.worldToLocal(t.clone());o.geometry=o.geometry.clone();o.geometry.translate(-l.x,-l.y,-l.z);o.geometry.computeBoundingBox();o.geometry.computeBoundingSphere();o.position.copy(t);if(o.userData.cap)o.userData.cap.c=o.userData.cap.c.map((v,i)=>v-[l.x,l.y,l.z][i])})));
+/* 調べる */
+const sz=b=>b.getSize(new T.Vector3()),f2=v=>v.toFixed(2);
+C('調べる','大きさ (幅・高さ・奥行き)','size dimension 寸法',()=>{const b=new T.Box3();need().forEach(o=>b.expandByObject(o));const s=sz(b);toast(`幅 ${f2(s.x)} / 高さ ${f2(s.y)} / 奥行き ${f2(s.z)}`)},1);
+C('調べる','体積と表面積','volume area 体積 表面積',()=>{let v=0,a=0;need().forEach(o=>{if(o.userData.light)return;const g=world(o),p=g.attributes.position,A=new T.Vector3(),B=new T.Vector3(),D=new T.Vector3();for(let i=0;i<p.count;i+=3){A.fromBufferAttribute(p,i);B.fromBufferAttribute(p,i+1);D.fromBufferAttribute(p,i+2);v+=A.dot(B.clone().cross(D))/6;a+=B.clone().sub(A).cross(D.clone().sub(A)).length()/2}});toast(`体積 ${f2(Math.abs(v))} / 表面積 ${f2(a)} (閉じた形のとき正確)`)},1);
+C('調べる','面の数と頂点の数','count polygon vertex 面 頂点',()=>{let t=0,v=0;need().forEach(o=>{if(o.userData.light)return;const g=o.geometry;t+=(g.index?g.index.count:g.attributes.position.count)/3;v+=g.attributes.position.count});toast(`三角形 ${t} 個 / 頂点 ${v} 個`)},1);
+C('調べる','2つの物体の距離','distance 距離',()=>{const s=need();if(s.length!=2)throw Error('2つ選んでください');toast('中心間の距離: '+f2(bb(s[0]).getCenter(new T.Vector3()).distanceTo(bb(s[1]).getCenter(new T.Vector3()))))},1);
+C('調べる','位置 (中心の座標)','position coordinate 座標',()=>{const c=bb(need()[sel.length-1]).getCenter(new T.Vector3());toast(`X ${f2(c.x)} / Y ${f2(c.y)} / Z ${f2(c.z)}`)},1);
+/* 生成 */
+const gen=(n,f)=>C('生成',n,'generate procedural 自動 生成',()=>{const k=objs.length;f();sel=[merge(objs.slice(k),n.split(' ')[0])];frame(sel)}),GR='#c8ced8';
+[5,10,20].forEach(n=>gen(`階段 ${n}段`,()=>{for(let i=0;i<n;i++)put('box',[0,(i+1)*.125,-i*.4],[2,(i+1)*.25,.4],GR)}));
+[12,24,36].forEach(n=>gen(`らせん階段 ${n}段`,()=>{put('cyl',[0,n*.1,0],[.4,n*.2,.4],'#8a8f98');for(let i=0;i<n;i++){const a=i*.35;put('box',[Math.sin(a)*.7,(i+.5)*.2,Math.cos(a)*.7],[.9,.15,1.4],GR,a)}}));
+[4,6,10].forEach(n=>gen(`ピラミッド ${n}段`,()=>{for(let i=0;i<n;i++){const s=(n-i)*.9;put('box',[0,i*.5+.25,0],[s,.5,s],'#e6d3b3')}}));
+[5,10,20].forEach(n=>gen(`柵 ${n}本`,()=>{const L=(n-1)*.5;for(let i=0;i<n;i++)put('box',[(i-(n-1)/2)*.5,.5,0],[.15,1,.15],'#a0693a');[.3,.75].forEach(y=>put('box',[0,y,0],[L+.15,.1,.08],'#b9825a'))}));
+[3,4].forEach(k=>gen(`球の格子 ${k}x${k}x${k}`,()=>{for(let i=0;i<k;i++)for(let j=0;j<k;j++)for(let l=0;l<k;l++)put('lowsph',[(i-(k-1)/2)*.9,j*.9+.4,(l-(k-1)/2)*.9],[.6,.6,.6],PAL[(i+j+l)%6])}));
+[20,50].forEach(n=>gen(`球のらせん ${n}個`,()=>{for(let i=0;i<n;i++)put('lowsph',[Math.cos(i*.5)*1.2,i*.12+.3,Math.sin(i*.5)*1.2],[.3,.3,.3],PAL[i%6])}));
+[50,200].forEach(n=>gen(`球面に点を並べる ${n}個`,()=>{for(let i=0;i<n;i++){const y=1-2*(i+.5)/n,r=Math.sqrt(1-y*y),p=i*2.39996;put('lowsph',[Math.cos(p)*r*2,y*2+2.2,Math.sin(p)*r*2],[.2,.2,.2],PAL[i%6])}}));
+[3,5].forEach(n=>gen(`段付きの塔 ${n}段`,()=>{for(let i=0;i<n;i++){const s=2-i*(1.4/n);put('cyl',[0,i*.8+.4,0],[s,.8,s],PAL[i%6])}}));
+gen('チェス盤 8x8',()=>{for(let i=0;i<8;i++)for(let j=0;j<8;j++)put('box',[(i-3.5)*.5,.1,(j-3.5)*.5],[.5,.2,.5],(i+j)%2?'#222831':'#f1f3f8')});
+[8,12,20].forEach(n=>gen(`歯車 ${n}歯`,()=>{put('cyl',[0,.2,0],[2,.4,2],'#aab3c5');for(let i=0;i<n;i++){const a=S2*i/n;put('box',[Math.sin(a)*1.05,.2,Math.cos(a)*1.05],[.25,.4,.3],'#aab3c5',a)}}));
+/* 変形 (追加) */
+const eachG=f=>need().forEach(o=>{if(o.userData.light)return;const g=o.geometry.index?o.geometry.toNonIndexed():o.geometry.clone();f(g);g.computeBoundingBox();g.computeBoundingSphere();o.geometry=g});
+C('変形','細かく分割 (形は変えない)','subdivide 細分化 分割',()=>eachG(g=>{const p=g.attributes.position,n=g.attributes.normal;if(p.count>150000)throw Error('すでに十分細かいです');const P=[],N=[],v=i=>new T.Vector3().fromBufferAttribute(p,i),w=i=>new T.Vector3().fromBufferAttribute(n,i),m=(x,y)=>x.clone().add(y).multiplyScalar(.5);
+ for(let i=0;i<p.count;i+=3){const a=v(i),b=v(i+1),c=v(i+2),na=w(i),nb=w(i+1),nc=w(i+2),ab=m(a,b),bc=m(b,c),ca=m(c,a),nab=m(na,nb).normalize(),nbc=m(nb,nc).normalize(),nca=m(nc,na).normalize();
+  [[a,ab,ca,na,nab,nca],[ab,b,bc,nab,nb,nbc],[ca,bc,c,nca,nbc,nc],[ab,bc,ca,nab,nbc,nca]].forEach(t=>{for(let k=0;k<3;k++){P.push(t[k].x,t[k].y,t[k].z);N.push(t[k+3].x,t[k+3].y,t[k+3].z)}})}
+ g.setAttribute('position',new T.Float32BufferAttribute(P,3));g.setAttribute('normal',new T.Float32BufferAttribute(N,3));g.deleteAttribute('uv')}));
+const swapW=g=>{const p=g.attributes.position,n=g.attributes.normal;for(let i=0;i<p.count;i+=3)for(const at of[p,n]){if(!at)continue;const x=at.getX(i+1),y=at.getY(i+1),z=at.getZ(i+1);at.setXYZ(i+1,at.getX(i+2),at.getY(i+2),at.getZ(i+2));at.setXYZ(i+2,x,y,z)}};
+const flipG=g=>{swapW(g);const n=g.attributes.normal;for(let i=0;i<n.count;i++)n.setXYZ(i,-n.getX(i),-n.getY(i),-n.getZ(i))};
+C('変形','面の向きを反転 (裏返す)','flip normals 裏返す 法線',()=>eachG(flipG));
+C('変形','面ごとにカクカクさせる (法線)','faceted flat normals カクカク',()=>eachG(g=>g.computeVertexNormals()));
+C('変形','なめらかに見せる (法線の平均化)','smooth normals なめらか',()=>eachG(g=>{const p=g.attributes.position,n=g.attributes.normal,W=welder(1e-5),ids=[],S=[],a=new T.Vector3(),b=new T.Vector3(),c=new T.Vector3();for(let i=0;i<p.count;i++)ids.push(W.id(a.fromBufferAttribute(p,i)));
+ for(let i=0;i<p.count;i+=3){a.fromBufferAttribute(p,i);b.fromBufferAttribute(p,i+1);c.fromBufferAttribute(p,i+2);const f=b.clone().sub(a).cross(c.clone().sub(a));for(let k=0;k<3;k++){const s=S[ids[i+k]]||(S[ids[i+k]]=new T.Vector3());s.add(f)}}
+ for(let i=0;i<p.count;i++){const s=S[ids[i]].clone().normalize();n.setXYZ(i,s.x,s.y,s.z)}}));
+[-180,-90,-45,45,90,180].forEach(d=>D(`曲げる ${sg(d)}度`,'bend 曲げる',(v,b)=>{const h=b.max.y-b.min.y||1,yc=(b.max.y+b.min.y)/2,R=h/(d*PI/180),th=(v.y-yc)/R;v.set(R-(R-v.x)*Math.cos(th),(R-v.x)*Math.sin(th)+yc,v.z)}));
+[-.6,-.3,.3,.6].forEach(k=>D(`斜めにずらす (せん断) ${sg(k)}`,'shear ずらす',(v,b)=>{v.x+=k*(v.y-b.min.y)}));
+[[.3,'中央をふくらませる 弱'],[.6,'中央をふくらませる 強'],[-.3,'中央をくびれさせる']].forEach(([k,n])=>D(n,'barrel 樽 くびれ',(v,b)=>{const t=ht(v,b)*2-1,s=1+k*(1-t*t);v.x*=s;v.z*=s}));
+[.02,.05,.1].forEach(a=>D(`ざらざらに揺らす ${a}`,'jitter rough 揺らす',v=>{const h=k=>{const s=Math.sin(k)*43758.5453;return s-Math.floor(s)-.5};v.x+=h(v.x*12.9+v.y*78.2+v.z*37.7)*a;v.y+=h(v.x*93.9+v.y*67.3+v.z*12.3+1)*a;v.z+=h(v.x*26.6+v.y*53.1+v.z*91.7+2)*a}));
+[.05,.15].forEach(a=>D(`波紋をつける ${a}`,'ripple 波紋',v=>{v.y+=Math.sin(Math.hypot(v.x,v.z)*6)*a}));
+/* 素材・模様 */
+const TX={};function tex(k){if(TX[k])return TX[k];const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,128,128);x.fillStyle='#555e75';
+ if(k=='c'){x.fillRect(0,0,64,64);x.fillRect(64,64,64,64)}else if(k=='h'){x.fillRect(0,0,128,32);x.fillRect(0,64,128,32)}else if(k=='v'){x.fillRect(0,0,32,128);x.fillRect(64,0,32,128)}else if(k=='d'){x.beginPath();x.arc(64,64,24,0,S2);x.fill()}else if(k=='g'){x.fillRect(0,0,128,8);x.fillRect(0,0,8,128)}else for(let i=0;i<900;i++){x.globalAlpha=Math.random()*.5;x.fillRect(Math.random()*128,Math.random()*128,3,3)}
+ const t=new T.CanvasTexture(c);t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(2,2);return TX[k]=t}
+[['c','チェッカー'],['h','横じま'],['v','縦じま'],['d','水玉'],['g','格子線'],['n','ざらざら']].forEach(([k,n])=>C('素材',`模様: ${n}`,'pattern texture 模様 柄',()=>eM(m=>{m.map=tex(k);m.needsUpdate=true})));
+C('素材','模様を消す','pattern clear remove',()=>eM(m=>{m.map=null;m.needsUpdate=true}));
+C('素材','両面表示にする','double side 両面',()=>eM(m=>{m.side=T.DoubleSide;m.needsUpdate=true}));
+C('素材','片面表示にする','single side 片面',()=>eM(m=>{m.side=T.FrontSide;m.needsUpdate=true}));
+C('素材','影を落とす','cast shadow',()=>need().forEach(o=>o.castShadow=true));
+C('素材','影を落とさない','no shadow',()=>need().forEach(o=>o.castShadow=false));
+/* 雰囲気・ライト・カメラ・選択 */
+[['朝','#bcd9f2',1.1,'#ffe2b8',[-6,5,4],.8],['昼','#8ec9ee',1.5,'#ffffff',[5,12,4],.8],['夕方','#f0a46b',1.2,'#ff9a52',[9,3,2],.5],['夜','#10162e',.35,'#8aa4ff',[3,8,-4],.2],['スタジオ (白)','#eef0f4',1.3,'#ffffff',[4,9,6],1],['ネオン','#150a2e',.5,'#c04dff',[-5,5,5],.35]].forEach(([n,b,si,sc,p,am])=>C('シーン','雰囲気: '+n,'mood atmosphere 雰囲気 朝 昼 夕方 夜',()=>{bg=b;scene.background=new T.Color(b);if(scene.fog)scene.fog.color.set(b);sun.intensity=si;sun.color.set(sc);sun.position.set(...p);amb.intensity=am},1));
+[['白','#ffffff'],['暖色','#ffd9a0'],['橙','#ff9a52'],['寒色','#a8ccff'],['ピンク','#ffb3d1']].forEach(([n,c])=>C('シーン','太陽光の色: '+n,'sun color 太陽 色',()=>sun.color.set(c),1));
+C('ライト','三点照明をつくる (主光・補助光・逆光)','three point lighting 三点',()=>[['s','#fff1d6',[5,5,5]],['p','#a8ccff',[-5,3,3]],['p','#ffffff',[0,5,-6]]].forEach(([k,c,p])=>{addLight(k,c);sel[0].position.set(...p)}));
+C('ライト','ライトをすべて削除','light remove all',()=>{const l=objs.filter(o=>o.userData.light);l.forEach(o=>scene.remove(o));objs=objs.filter(o=>!o.userData.light);sel=[]});
+const VW=[];[1,2,3].forEach(i=>{C('カメラ',`視点を保存 ${i}`,'save view bookmark 視点 保存',()=>{VW[i]={t:cs.t.clone(),th:cs.th,ph:cs.ph,r:cs.r,f:cam.fov};toast('視点'+i+'を保存しました')},1);C('カメラ',`視点を呼び出す ${i}`,'restore view bookmark 視点 呼び出し',()=>{const v=VW[i];if(!v)throw Error('視点'+i+'はまだ保存されていません');cs.t.copy(v.t);cs.th=v.th;cs.ph=v.ph;cs.r=v.r;cam.fov=v.f;cam.updateProjectionMatrix()},1)});
+const rm=l=>{l.forEach(o=>scene.remove(o));objs=objs.filter(o=>!l.includes(o));sel=sel.filter(o=>!l.includes(o))};
+C('編集','切断用の平面をすべて選択','select planes cutters',()=>{sel=objs.filter(isCut)},1);
+C('編集','切断用の平面をすべて削除','delete planes cutters',()=>rm(objs.filter(isCut)));
+C('編集','ライトをすべて選択','select lights',()=>{sel=objs.filter(o=>o.userData.light)},1);
+C('編集','同じ形状の物体を選択','select same shape',()=>{const k=new Set(need().map(o=>o.userData.kind).filter(Boolean));sel=objs.filter(o=>k.has(o.userData.kind))},1);
+C('編集','同じ色の物体を選択','select same color',()=>{const k=new Set(need().map(o=>o.material.color.getHex()));sel=objs.filter(o=>k.has(o.material.color.getHex()))},1);
+C('編集','非表示の物体を削除','delete hidden',()=>rm(objs.filter(o=>!o.visible)));
+
+/* ---------- ブーリアン (BSPによる和・差・積) ---------- */
+const CSG=(()=>{const E=1e-5;
+ class Vc{constructor(x,y,z){this.x=x;this.y=y;this.z=z}clone(){return new Vc(this.x,this.y,this.z)}neg(){return new Vc(-this.x,-this.y,-this.z)}plus(a){return new Vc(this.x+a.x,this.y+a.y,this.z+a.z)}minus(a){return new Vc(this.x-a.x,this.y-a.y,this.z-a.z)}times(k){return new Vc(this.x*k,this.y*k,this.z*k)}dot(a){return this.x*a.x+this.y*a.y+this.z*a.z}lerp(a,t){return this.plus(a.minus(this).times(t))}unit(){return this.times(1/Math.sqrt(this.dot(this)))}cross(a){return new Vc(this.y*a.z-this.z*a.y,this.z*a.x-this.x*a.z,this.x*a.y-this.y*a.x)}}
+ class Vx{constructor(p,n){this.p=p;this.n=n}clone(){return new Vx(this.p.clone(),this.n.clone())}flip(){this.n=this.n.neg()}lerp(o,t){return new Vx(this.p.lerp(o.p,t),this.n.lerp(o.n,t).unit())}}
+ class Pl{constructor(n,w){this.n=n;this.w=w}static of(a,b,c){const n=b.minus(a).cross(c.minus(a)).unit();return new Pl(n,n.dot(a))}clone(){return new Pl(this.n.clone(),this.w)}flip(){this.n=this.n.neg();this.w=-this.w}
+  split(po,cf,cb,f,b){let t=0;const ty=po.v.map(v=>{const d=this.n.dot(v.p)-this.w,k=d<-E?2:d>E?1:0;t|=k;return k});
+   if(t==0)(this.n.dot(po.pl.n)>0?cf:cb).push(po);else if(t==1)f.push(po);else if(t==2)b.push(po);
+   else{const F=[],B=[],n=po.v.length;for(let i=0;i<n;i++){const j=(i+1)%n,ti=ty[i],tj=ty[j],vi=po.v[i],vj=po.v[j];if(ti!=2)F.push(vi);if(ti!=1)B.push(ti!=2?vi.clone():vi);if((ti|tj)==3){const s=(this.w-this.n.dot(vi.p))/this.n.dot(vj.p.minus(vi.p)),v=vi.lerp(vj,s);F.push(v);B.push(v.clone())}}if(F.length>=3)f.push(new Pg(F));if(B.length>=3)b.push(new Pg(B))}}}
+ class Pg{constructor(v){this.v=v;this.pl=Pl.of(v[0].p,v[1].p,v[2].p)}clone(){return new Pg(this.v.map(x=>x.clone()))}flip(){this.v.reverse().forEach(x=>x.flip());this.pl.flip()}}
+ class Nd{constructor(p){this.pl=null;this.f=null;this.b=null;this.p=[];if(p)this.build(p)}
+  clone(){const n=new Nd();n.pl=this.pl&&this.pl.clone();n.f=this.f&&this.f.clone();n.b=this.b&&this.b.clone();n.p=this.p.map(x=>x.clone());return n}
+  invert(){this.p.forEach(x=>x.flip());this.pl.flip();if(this.f)this.f.invert();if(this.b)this.b.invert();[this.f,this.b]=[this.b,this.f]}
+  clip(ps){if(!this.pl)return ps.slice();let f=[],b=[];ps.forEach(x=>this.pl.split(x,f,b,f,b));f=this.f?this.f.clip(f):f;b=this.b?this.b.clip(b):[];return f.concat(b)}
+  clipTo(n){this.p=n.clip(this.p);if(this.f)this.f.clipTo(n);if(this.b)this.b.clipTo(n)}
+  all(){let a=this.p.slice();if(this.f)a=a.concat(this.f.all());if(this.b)a=a.concat(this.b.all());return a}
+  build(ps){if(!ps.length)return;if(!this.pl)this.pl=ps[0].pl.clone();const f=[],b=[];ps.forEach(x=>this.pl.split(x,this.p,this.p,f,b));if(f.length){if(!this.f)this.f=new Nd();this.f.build(f)}if(b.length){if(!this.b)this.b=new Nd();this.b.build(b)}}}
+ const mk=(A,B)=>[new Nd(A.map(p=>p.clone())),new Nd(B.map(p=>p.clone()))];
+ return{Vc,Vx,Pg,
+  union(A,B){const[a,b]=mk(A,B);a.clipTo(b);b.clipTo(a);b.invert();b.clipTo(a);b.invert();a.build(b.all());return a.all()},
+  subtract(A,B){const[a,b]=mk(A,B);a.invert();a.clipTo(b);b.clipTo(a);b.invert();b.clipTo(a);b.invert();a.build(b.all());a.invert();return a.all()},
+  intersect(A,B){const[a,b]=mk(A,B);a.invert();b.clipTo(a);b.invert();a.clipTo(b);b.clipTo(a);a.build(b.all());a.invert();return a.all()}}})();
+function boolOp(op,swap){let s=need().filter(o=>!o.userData.light&&!isCut(o));if(s.length<2)throw Error('2つ以上選んでください (最初に選んだ物体が基準)');if(swap)s=[s[1],s[0],...s.slice(2)];
+ const tris=s.reduce((t,o)=>t+(o.geometry.index?o.geometry.index.count:o.geometry.attributes.position.count)/3,0);if(tris>6000)throw Error(`面が多すぎます (${tris}個)。6000個以下にしてください。「面の数」で確認できます`);
+ const toP=o=>{const g=world(o),p=g.attributes.position,n=g.attributes.normal,L=[];for(let i=0;i<p.count;i+=3){const v=[0,1,2].map(k=>new CSG.Vx(new CSG.Vc(p.getX(i+k),p.getY(i+k),p.getZ(i+k)),new CSG.Vc(n.getX(i+k),n.getY(i+k),n.getZ(i+k))));const a=v[1].p.minus(v[0].p).cross(v[2].p.minus(v[0].p));if(a.dot(a)>1e-14)L.push(new CSG.Pg(v))}return L};
+ let r=toP(s[0]);s.slice(1).forEach(o=>{r=CSG[op](r,toP(o))});if(!r.length)throw Error('結果が空になりました (物体が重なっていない可能性があります)');
+ const P=[],N=[];r.forEach(pg=>{for(let i=1;i<pg.v.length-1;i++)[pg.v[0],pg.v[i],pg.v[i+1]].forEach(v=>{P.push(v.p.x,v.p.y,v.p.z);N.push(v.n.x,v.n.y,v.n.z)})});
+ const m=solid(geo(P,N),{union:'合体',subtract:'くり抜き',intersect:'共通部分'}[op],s[0].material.clone());s.forEach(o=>scene.remove(o));objs=objs.filter(o=>!s.includes(o));sel=[reg(m)]}
+C('ブーリアン','合体 (和: 2つを1つの形にする)','boolean union 合体 和 結合',()=>boolOp('union'));
+C('ブーリアン','くり抜く (最初の物体から後の物体を引く)','boolean subtract difference 差 くり抜く 穴 引く',()=>boolOp('subtract'));
+C('ブーリアン','くり抜く (逆: 後の物体から最初の物体を引く)','boolean subtract reverse 差 逆',()=>boolOp('subtract',1));
+C('ブーリアン','共通部分だけ残す (積)','boolean intersect 積 重なり',()=>boolOp('intersect'));
+/* ---------- ギズモ (ドラッグで動かすハンドル) ---------- */
+const GZ=new T.Group(),GC={x:'#ff5b5b',y:'#5bd16a',z:'#5b9bff'},gM=new T.Group(),gR=new T.Group(),gS=new T.Group();let gzOn=true,gd=null;GZ.add(gM,gR,gS);scene.add(GZ);
+const gmat=(c,o)=>new T.MeshBasicMaterial({color:c,depthTest:false,depthWrite:false,transparent:true,opacity:o||1}),hitM=()=>new T.MeshBasicMaterial({visible:false});
+const gpart=(par,ge,ma,k)=>{const m=new T.Mesh(ge,ma);m.renderOrder=1000;m.userData.k=k;par.add(m);return m};
+[['x',[0,0,-PI/2],[0,PI/2,0]],['y',[0,0,0],[PI/2,0,0]],['z',[PI/2,0,0],[0,0,0]]].forEach(([a,r,rr])=>{const c=GC[a];
+ [gM,gS].forEach(g=>{const t=new T.Group(),mv=g==gM,k=(mv?'m':'s')+a;t.rotation.set(...r);g.add(t);gpart(t,new T.CylinderGeometry(.02,.02,.8,8).translate(0,.4,0),gmat(c),k);gpart(t,mv?new T.ConeGeometry(.08,.24,16).translate(0,.92,0):new T.BoxGeometry(.15,.15,.15).translate(0,.95,0),gmat(c),k);gpart(t,new T.CylinderGeometry(.13,.13,1.1,8).translate(0,.55,0),hitM(),k)});
+ const rg=new T.Group();rg.rotation.set(...rr);gR.add(rg);gpart(rg,new T.TorusGeometry(1,.02,8,72),gmat(c),'r'+a);gpart(rg,new T.TorusGeometry(1,.09,6,48),hitM(),'r'+a)});
+[['pxz',GC.y,[-PI/2,0,0],[.4,0,.4]],['pxy',GC.z,[0,0,0],[.4,.4,0]],['pyz',GC.x,[0,PI/2,0],[0,.4,.4]]].forEach(([k,c,r,p])=>{const m=gpart(gM,new T.PlaneGeometry(.26,.26),gmat(c,.55),k);m.material.side=T.DoubleSide;m.rotation.set(...r);m.position.set(...p)});
+gpart(gS,new T.BoxGeometry(.22,.22,.22),gmat('#ffffff'),'su');
+function gzUpdate(){const a=sel.filter(o=>o.visible);GZ.visible=gzOn&&a.length>0;if(!GZ.visible)return;const b=new T.Box3(),p=new T.Vector3();a.forEach(o=>b.expandByObject(o));b.getCenter(p);GZ.position.copy(p);GZ.scale.setScalar(cam.position.distanceTo(p)*.17);
+ gM.visible=tool=='move';gR.visible=tool=='rot';gS.visible=tool=='scl';GZ.quaternion.copy(tool=='scl'&&a.length==1?a[0].quaternion:new T.Quaternion())}
+const axisT=(a,o,e)=>{ndc(e);const d=ray.ray.direction,w=ray.ray.origin.clone().sub(o),b=d.dot(a),den=1-b*b;return Math.abs(den)<1e-4?null:(a.dot(w)-b*d.dot(w))/den},
+ planeHit=(n,o,e)=>{ndc(e);const p=new T.Vector3();return ray.ray.intersectPlane(new T.Plane().setFromNormalAndCoplanarPoint(n,o),p)?p:null};
+cv.addEventListener('pointerdown',e=>{if(e.button!=0||!GZ.visible)return;ndc(e);const hs=[];({move:gM,rot:gR,scl:gS})[tool].traverse(o=>{if(o.userData.k)hs.push(o)});const h=ray.intersectObjects(hs,false)[0];if(!h)return;
+ e.stopImmediatePropagation();cv.setPointerCapture(e.pointerId);const k=h.object.userData.k,p0=GZ.position.clone(),a=AXN[k[1]]?AXN[k[1]].clone().applyQuaternion(GZ.quaternion):null;
+ gd={k,ax:a,p0,pre:snap(),moved:false,y0:e.clientY,st:sel.map(o=>({o,p:o.position.clone(),q:o.quaternion.clone(),s:o.scale.clone()})),nrm:{pxy:AXN.z,pyz:AXN.x,pxz:AXN.y}[k]};
+ if(k[0]=='m'||k[0]=='s')gd.t0=axisT(a,p0,e);else if(k[0]=='p')gd.h0=planeHit(gd.nrm,p0,e);else if(k[0]=='r')gd.h0=planeHit(a,p0,e)});
+cv.addEventListener('pointermove',e=>{if(!gd)return;e.stopImmediatePropagation();gd.moved=true;const k=gd.k[0],sn=e.shiftKey,rd=v=>Math.round(v*4)/4;
+ if(k=='m'){const t=axisT(gd.ax,gd.p0,e);if(t==null)return;let d=t-gd.t0;if(sn)d=rd(d);gd.st.forEach(s=>s.o.position.copy(s.p).addScaledVector(gd.ax,d))}
+ else if(k=='p'){const h=planeHit(gd.nrm,gd.p0,e);if(!h)return;const d=h.sub(gd.h0);if(sn)d.set(rd(d.x),rd(d.y),rd(d.z));gd.st.forEach(s=>s.o.position.copy(s.p).add(d))}
+ else if(k=='r'){const h=planeHit(gd.ax,gd.p0,e);if(!h)return;const r0=gd.h0.clone().sub(gd.p0),r=h.sub(gd.p0);let an=Math.atan2(gd.ax.dot(r0.clone().cross(r)),r0.dot(r));if(sn)an=Math.round(an/(PI/12))*PI/12;const q=new T.Quaternion().setFromAxisAngle(gd.ax,an);gd.st.forEach(s=>{if(gd.st.length>1)s.o.position.copy(s.p).sub(gd.p0).applyQuaternion(q).add(gd.p0);s.o.quaternion.copy(q).multiply(s.q)})}
+ else{let f;if(gd.k=='su')f=Math.exp(-(e.clientY-gd.y0)*.01);else{const t=axisT(gd.ax,gd.p0,e);if(t==null||!gd.t0)return;f=Math.max(.02,t/gd.t0)}gd.st.forEach(s=>{s.o.scale.copy(s.s);if(gd.k=='su')s.o.scale.multiplyScalar(f);else s.o.scale[gd.k[1]]=s.s[gd.k[1]]*f})}});
+cv.addEventListener('pointerup',e=>{if(!gd)return;e.stopImmediatePropagation();if(gd.moved){hist.push(gd.pre);fut=[]}gd=null;refresh()});
+C('シーン','ギズモ (ドラッグ用ハンドル) 表示切替','gizmo handle toggle ハンドル',()=>{gzOn=!gzOn},1);
+/* ---------- 位置・回転・大きさのボタン (Z方向もボタンで) ---------- */
+const pad=document.createElement('div');pad.id='pad';vp.appendChild(pad);
+Object.assign(IC,{al:'M19 12H5M11 6l-6 6 6 6',ar:'M5 12h14M13 6l6 6-6 6',au:'M12 19V5M6 11l6-6 6 6',ad:'M12 5v14M6 13l6 6 6-6',af:'M6 18L18 6M9 6h9v9',an:'M18 6L6 18M15 18H6V9',plus:'M5 12h14M12 5v14',minus:'M5 12h14',cut:'M12 3l8 4.5v9L12 21l-8-4.5v-9zM2 12h20',join:'M3 8h7v8H3zM14 8h7v8h-7zM10 12h4'});
+Object.assign(CI,{チュートリアル:'cube',切断:'cut',結合:'join',整列:'grid',生成:'cube',調べる:'search',ブーリアン:'join','Blender連携':'img','3Dプリント':'cube',読み込み:'img'});
+const pstep={move:.5,rot:15,scl:1.25},PS={move:[.1,.25,.5,1,2,5],rot:[5,15,45,90],scl:[1.1,1.25,1.5,2]};
+function rotAbout(L,ax,an){const q=new T.Quaternion().setFromAxisAngle(ax,an);let p=null;if(L.length>1){const b=new T.Box3();L.forEach(o=>b.expandByObject(o));p=b.getCenter(new T.Vector3())}L.forEach(o=>{if(p)o.position.sub(p).applyQuaternion(q).add(p);o.quaternion.premultiply(q)})}
+function padDraw(){pad.style.display=sel.length?'block':'none';if(!sel.length)return;
+ const rows={move:[['x','左右','al','ar'],['y','上下','ad','au'],['z','奥・手前','af','an']],rot:[['x','X軸','minus','plus'],['y','Y軸','minus','plus'],['z','Z軸','minus','plus']],scl:[['x','X方向','minus','plus'],['y','Y方向','minus','plus'],['z','Z方向','minus','plus'],['u','全体','minus','plus']]}[tool];
+ pad.innerHTML=`<div class="ph"><b>${{move:'位置',rot:'回転',scl:'大きさ'}[tool]}</b><select id="pst" aria-label="1回の量">${PS[tool].map(v=>`<option${v==pstep[tool]?' selected':''}>${v}</option>`).join('')}</select><span>${{move:'',rot:'度',scl:'倍'}[tool]}</span></div>`+rows.map(([a,l,m,p])=>`<div class="pr"><label>${l}</label><button data-a="${a}" data-s="-1" aria-label="${l} マイナス">${ic(m)}</button><button data-a="${a}" data-s="1" aria-label="${l} プラス">${ic(p)}</button></div>`).join('')}
+pad.onclick=e=>{const b=e.target.closest('button');if(!b)return;const a=b.dataset.a,s=+b.dataset.s,st=pstep[tool];run({f:()=>{const L=need();if(tool=='move')L.forEach(o=>o.position[a]+=s*st);else if(tool=='rot')rotAbout(L,AXN[a],s*st*PI/180);else L.forEach(o=>{const f=s>0?st:1/st;if(a=='u')o.scale.multiplyScalar(f);else o.scale[a]*=f})}})};
+pad.onchange=e=>{if(e.target.id=='pst')pstep[tool]=parseFloat(e.target.value)};
+/* ---------- Blender 連携・3Dプリンタ ---------- */
+function dl(name,data,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:type||'application/octet-stream'}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
+const exList=()=>{const l=(sel.length?sel:objs).filter(o=>o.visible&&!o.userData.light&&!isCut(o));if(!l.length)throw Error('書き出せる物体がありません');return l},exLights=()=>sel.length?[]:objs.filter(o=>o.visible&&o.userData.light);
+function indexed(g){const p=g.attributes.position,n=g.attributes.normal,c=g.attributes.color,m=new Map(),V=[],Nn=[],Cc=[],F=[];for(let i=0;i<p.count;i++){const k=[p.getX(i),p.getY(i),p.getZ(i),n.getX(i),n.getY(i),n.getZ(i)].map(v=>Math.round(v*1e5)).join(',');let j=m.get(k);if(j===undefined){j=V.length/3;m.set(k,j);V.push(p.getX(i),p.getY(i),p.getZ(i));Nn.push(n.getX(i),n.getY(i),n.getZ(i));if(c)Cc.push(c.getX(i),c.getY(i),c.getZ(i))}F.push(j)}return{V,Nn,Cc,F}}
+const lin=c=>Math.pow(c,2.2);
+function toOBJ(L){let o='# Blendy 3D\nmtllib blendy.mtl\n',m='',vo=1;L.forEach((ob,i)=>{const I=indexed(world(ob)),c=ob.material;o+=`o ${ob.name.replace(/\s+/g,'_')}\nusemtl m${i}\n`;for(let k=0;k<I.V.length;k+=3)o+=`v ${I.V[k].toFixed(5)} ${I.V[k+1].toFixed(5)} ${I.V[k+2].toFixed(5)}\n`;for(let k=0;k<I.Nn.length;k+=3)o+=`vn ${I.Nn[k].toFixed(4)} ${I.Nn[k+1].toFixed(4)} ${I.Nn[k+2].toFixed(4)}\n`;
+ for(let k=0;k<I.F.length;k+=3){const a=I.F[k]+vo,b=I.F[k+1]+vo,d=I.F[k+2]+vo;if(a!=b&&b!=d&&a!=d)o+=`f ${a}//${a} ${b}//${b} ${d}//${d}\n`}vo+=I.V.length/3;m+=`newmtl m${i}\nKd ${c.color.r.toFixed(4)} ${c.color.g.toFixed(4)} ${c.color.b.toFixed(4)}\nNs ${((1-c.roughness)*200).toFixed(1)}\nd ${c.opacity}\n`});return[o,m]}
+function toSTL(L,k,fit){const A=[];L.forEach(ob=>{const p=world(ob).attributes.position;for(let i=0;i<p.count;i++)A.push(p.getX(i),-p.getZ(i),p.getY(i))});
+ const mn=[1/0,1/0,1/0],mx=[-1/0,-1/0,-1/0];for(let i=0;i<A.length;i+=3)for(let j=0;j<3;j++){mn[j]=Math.min(mn[j],A[i+j]);mx[j]=Math.max(mx[j],A[i+j])}
+ if(fit)k=fit/Math.max(mx[0]-mn[0],mx[1]-mn[1],mx[2]-mn[2]);const n=A.length/9,buf=new ArrayBuffer(84+50*n),dv=new DataView(buf);dv.setUint32(80,n,true);
+ for(let t=0;t<n;t++){const o=84+50*t,V=[];for(let j=0;j<3;j++)V.push([0,1,2].map(a=>(A[t*9+j*3+a]-(a==2?mn[2]:0))*k));const u=V[1].map((v,a)=>v-V[0][a]),w=V[2].map((v,a)=>v-V[0][a]),c=[u[1]*w[2]-u[2]*w[1],u[2]*w[0]-u[0]*w[2],u[0]*w[1]-u[1]*w[0]],l=Math.hypot(...c)||1;[c.map(v=>v/l),...V].forEach((v,i)=>v.forEach((x,a)=>dv.setFloat32(o+i*12+a*4,x,true)))}
+ return[buf,k,[0,1,2].map(a=>(mx[a]-mn[a])*k)]}
+function toGLB(L,lt){const bins=[],bv=[],ac=[],ms=[],mt=[],nodes=[],ls=[];
+ const push=(arr,Ct,tg)=>{const u=new Uint8Array(new Ct(arr).buffer),pd=(4-u.length%4)%4,q=new Uint8Array(u.length+pd);q.set(u);const off=bins.reduce((s,b)=>s+b.byteLength,0);bins.push(q);bv.push({buffer:0,byteOffset:off,byteLength:u.length,target:tg});return bv.length-1};
+ const acc=(arr,Ct,ct,type,count,extra)=>{ac.push({bufferView:push(arr,Ct,ct==5125?34963:34962),componentType:ct,count,type,...extra});return ac.length-1};
+ L.forEach(ob=>{const I=indexed(world(ob)),c=ob.material,n=I.V.length/3,mn=[1/0,1/0,1/0],mx=[-1/0,-1/0,-1/0];for(let k=0;k<I.V.length;k+=3)for(let j=0;j<3;j++){mn[j]=Math.min(mn[j],I.V[k+j]);mx[j]=Math.max(mx[j],I.V[k+j])}
+  const at={POSITION:acc(I.V,Float32Array,5126,'VEC3',n,{min:mn,max:mx}),NORMAL:acc(I.Nn,Float32Array,5126,'VEC3',n)};if(I.Cc.length)at.COLOR_0=acc(I.Cc.map(lin),Float32Array,5126,'VEC3',n);
+  const ix=acc(I.F,Uint32Array,5125,'SCALAR',I.F.length);
+  mt.push({name:ob.name,pbrMetallicRoughness:{baseColorFactor:[lin(c.color.r),lin(c.color.g),lin(c.color.b),c.opacity],metallicFactor:c.metalness,roughnessFactor:c.roughness},emissiveFactor:[c.emissive.r,c.emissive.g,c.emissive.b].map(v=>Math.min(1,lin(v)*c.emissiveIntensity)),alphaMode:c.opacity<1?'BLEND':'OPAQUE',doubleSided:true});
+  ms.push({name:ob.name,primitives:[{attributes:at,indices:ix,material:mt.length-1}]});nodes.push({name:ob.name,mesh:ms.length-1})});
+ lt.forEach(o=>{const Lg=o.userData.light,t=Lg.isPointLight?'point':Lg.isSpotLight?'spot':'directional',p=o.position,q=new T.Quaternion().setFromUnitVectors(new T.Vector3(0,0,-1),new T.Vector3().sub(p).normalize()),x={type:t,color:[lin(Lg.color.r),lin(Lg.color.g),lin(Lg.color.b)],intensity:Lg.intensity*(t=='directional'?3:100)};if(t=='spot')x.spot={outerConeAngle:Lg.angle};ls.push(x);nodes.push({name:o.name,translation:p.toArray(),rotation:q.toArray(),extensions:{KHR_lights_punctual:{light:ls.length-1}}})});
+ const total=bins.reduce((s,b)=>s+b.byteLength,0),J={asset:{version:'2.0',generator:'Blendy 3D'},scene:0,scenes:[{nodes:nodes.map((_,i)=>i)}],nodes,meshes:ms,materials:mt,accessors:ac,bufferViews:bv,buffers:[{byteLength:total}]};if(ls.length){J.extensionsUsed=['KHR_lights_punctual'];J.extensions={KHR_lights_punctual:{lights:ls}}}
+ const jb=new TextEncoder().encode(JSON.stringify(J)),jj=new Uint8Array(jb.length+(4-jb.length%4)%4).fill(32);jj.set(jb);
+ const out=new Uint8Array(28+jj.length+total),dv=new DataView(out.buffer);dv.setUint32(0,0x46546C67,true);dv.setUint32(4,2,true);dv.setUint32(8,out.length,true);dv.setUint32(12,jj.length,true);dv.setUint32(16,0x4E4F534A,true);out.set(jj,20);let o=20+jj.length;dv.setUint32(o,total,true);dv.setUint32(o+4,0x004E4942,true);o+=8;bins.forEach(b=>{out.set(b,o);o+=b.byteLength});return out}
+function toPY(L,lt){const r5=v=>+v.toFixed(5),l5=c=>r5(lin(c)),D={bg:[0,1,2].map(i=>l5(scene.background?scene.background.toArray()[i]:0)),meshes:[],lights:[]};
+ L.forEach(ob=>{const I=indexed(world(ob)),pm=new Map(),V=[],ix=[],F=[];for(let k=0;k<I.V.length;k+=3){const key=[0,1,2].map(j=>Math.round(I.V[k+j]*1e5)).join(',');let j=pm.get(key);if(j===undefined){j=V.length;pm.set(key,j);V.push([r5(I.V[k]),r5(-I.V[k+2]),r5(I.V[k+1])])}ix.push(j)}
+  for(let k=0;k<ix.length;k+=3)if(ix[k]!=ix[k+1]&&ix[k+1]!=ix[k+2]&&ix[k]!=ix[k+2])F.push([ix[k],ix[k+1],ix[k+2]]);const c=ob.material;
+  D.meshes.push({n:ob.name,V,F,s:I.V.length/3/V.length<1.5?1:0,c:[c.color.r,c.color.g,c.color.b].map(l5),r:c.roughness,m:c.metalness,a:c.opacity,e:[c.emissive.r,c.emissive.g,c.emissive.b].map(l5),ei:c.emissiveIntensity})});
+ lt.forEach(o=>{const g=o.userData.light,t=g.isPointLight?'POINT':g.isSpotLight?'SPOT':'SUN';D.lights.push({n:o.name,t,c:[g.color.r,g.color.g,g.color.b].map(l5),e:g.intensity*(t=='SUN'?3:1000),p:[r5(o.position.x),r5(-o.position.z),r5(o.position.y)]})});
+ return`# Blendy 3D から書き出し。Blender の Scripting タブで開いて「スクリプト実行」を押してください。
+import bpy, json, mathutils
+D = json.loads(r'''${JSON.stringify(D)}''')
+def mat(m):
+    mt = bpy.data.materials.new(m['n']); mt.use_nodes = True
+    b = mt.node_tree.nodes.get('Principled BSDF')
+    b.inputs['Base Color'].default_value = m['c'] + [1]
+    b.inputs['Roughness'].default_value = m['r']; b.inputs['Metallic'].default_value = m['m']; b.inputs['Alpha'].default_value = m['a']
+    for k in ('Emission Color', 'Emission'):
+        if k in b.inputs:
+            b.inputs[k].default_value = m['e'] + [1]; break
+    if 'Emission Strength' in b.inputs:
+        b.inputs['Emission Strength'].default_value = m['ei'] if max(m['e']) > 0 else 0
+    if m['a'] < 1 and hasattr(mt, 'blend_method'):
+        mt.blend_method = 'BLEND'
+    return mt
+for m in D['meshes']:
+    me = bpy.data.meshes.new(m['n']); me.from_pydata(m['V'], [], m['F']); me.update()
+    if m['s']:
+        me.polygons.foreach_set('use_smooth', [True] * len(me.polygons))
+    ob = bpy.data.objects.new(m['n'], me); bpy.context.collection.objects.link(ob); ob.data.materials.append(mat(m))
+for l in D['lights']:
+    ld = bpy.data.lights.new(l['n'], l['t']); ld.color = l['c']; ld.energy = l['e']
+    ob = bpy.data.objects.new(l['n'], ld); ob.location = l['p']; bpy.context.collection.objects.link(ob)
+    if l['t'] != 'POINT':
+        ob.rotation_euler = (-mathutils.Vector(l['p'])).to_track_quat('-Z', 'Y').to_euler()
+w = bpy.context.scene.world
+if w is None:
+    w = bpy.data.worlds.new('World'); bpy.context.scene.world = w
+w.use_nodes = True; w.node_tree.nodes['Background'].inputs[0].default_value = D['bg'] + [1]
+print('Blendy 3D: imported', len(D['meshes']), 'meshes')
+`}
+C('Blender連携','GLB で書き出す (Blender に推奨: 色・質感・ライト付き)','export glb gltf blender ブレンダー 書き出し エクスポート',()=>{const L=exList();dl('blendy3d.glb',toGLB(L,exLights()),'model/gltf-binary');toast(`${L.length}個を GLB で保存。Blender: ファイル > インポート > glTF 2.0`)},1);
+C('Blender連携','OBJ + MTL で書き出す','export obj mtl blender',()=>{const[o,m]=toOBJ(exList());dl('blendy3d.obj',o,'text/plain');dl('blendy3d.mtl',m,'text/plain');toast('OBJ と MTL を保存。同じフォルダに置いて Blender の OBJ インポートで読み込みます')},1);
+C('Blender連携','Blender 用スクリプト (.py) で書き出す','export python script blender スクリプト',()=>{dl('blendy3d_to_blender.py',toPY(exList(),exLights()),'text/x-python');toast('Blender の Scripting タブで開いて実行すると、物体・材質・ライトが作られます')},1);
+[['1単位=1mm',1],['1単位=10mm (1cm)',10],['1単位=100mm (10cm)',100]].forEach(([n,k])=>C('3Dプリント',`STL で書き出す (${n})`,'export stl 3dprint 3Dプリンタ 印刷 書き出し',()=>{const[b,s,z]=toSTL(exList(),k);dl('blendy3d.stl',b,'model/stl');toast(`STL 保存 (Z上向き): ${z.map(v=>v.toFixed(1)).join(' x ')} mm`)},1));
+[20,50,100,150,200].forEach(n=>C('3Dプリント',`STL で書き出す (最大の辺を ${n}mm に合わせる)`,'export stl size fit mm 大きさ',()=>{const[b,s,z]=toSTL(exList(),1,n);dl('blendy3d.stl',b,'model/stl');toast(`STL 保存: ${z.map(v=>v.toFixed(1)).join(' x ')} mm`)},1));
+const stdMat=()=>new T.MeshStandardMaterial({color:'#c8ced8',roughness:.55,metalness:.05,side:T.DoubleSide});
+function addImp(P,N,name){const g=geo(P,N);if(!N.length||(!N[0]&&!N[1]&&!N[2]))g.computeVertexNormals();return reg(solid(g,name,stdMat()))}
+function parseOBJ(t){const V=[],Nn=[],gs=[];let cur;const grp=n=>{cur={n,P:[],N:[]};gs.push(cur)},ix=(s,l)=>{const i=parseInt(s);return i<0?l+i:i-1};grp('OBJ');
+ t.split('\n').forEach(ln=>{const w=ln.trim().split(/\s+/);if(w[0]=='v')V.push(w.slice(1,4).map(Number));else if(w[0]=='vn')Nn.push(w.slice(1,4).map(Number));else if((w[0]=='o'||w[0]=='g')&&w[1]){if(cur.P.length)grp(w[1]);else cur.n=w[1]}
+  else if(w[0]=='f'){const f=w.slice(1).map(s=>{const a=s.split('/');return[ix(a[0],V.length),a[2]?ix(a[2],Nn.length):-1]});for(let i=1;i<f.length-1;i++)[f[0],f[i],f[i+1]].forEach(([v,n])=>{cur.P.push(...V[v]);cur.N.push(...(n>=0?Nn[n]:[0,0,0]))})}});return gs.filter(g=>g.P.length)}
+function parseSTL(buf){const dv=new DataView(buf),n=dv.getUint32(80,true),P=[];
+ if(buf.byteLength>=84&&84+50*n==buf.byteLength){for(let t=0;t<n;t++){const o=84+50*t;for(let j=0;j<3;j++)P.push(dv.getFloat32(o+12+j*12,true),dv.getFloat32(o+16+j*12,true),dv.getFloat32(o+20+j*12,true))}}
+ else{const re=/vertex\s+(\S+)\s+(\S+)\s+(\S+)/g,s=new TextDecoder().decode(buf);let m;while(m=re.exec(s))P.push(+m[1],+m[2],+m[3])}
+ for(let i=0;i<P.length;i+=3){const y=P[i+1];P[i+1]=P[i+2];P[i+2]=-y}return P}
+function parseGLB(buf){const dv=new DataView(buf);if(dv.getUint32(0,true)!=0x46546C67)throw Error('GLB ファイルではありません');let o=12,J=null,B=null;
+ while(o<buf.byteLength){const l=dv.getUint32(o,true),t=dv.getUint32(o+4,true);if(t==0x4E4F534A)J=JSON.parse(new TextDecoder().decode(new Uint8Array(buf,o+8,l)));else if(t==0x004E4942)B=buf.slice(o+8,o+8+l);o+=8+l}
+ const CT={5126:Float32Array,5125:Uint32Array,5123:Uint16Array,5121:Uint8Array},NC={SCALAR:1,VEC2:2,VEC3:3,VEC4:4},res=[];
+ const rd=i=>{const a=J.accessors[i],v=J.bufferViews[a.bufferView],C=CT[a.componentType],n=NC[a.type],st=v.byteStride?v.byteStride/C.BYTES_PER_ELEMENT:n,src=new C(B,(v.byteOffset||0)+(a.byteOffset||0),(a.count-1)*st+n),out=new C(a.count*n);for(let k=0;k<a.count;k++)for(let j=0;j<n;j++)out[k*n+j]=src[k*st+j];return out};
+ const walk=(i,par)=>{const nd=J.nodes[i],m=new T.Matrix4();if(nd.matrix)m.fromArray(nd.matrix);else m.compose(new T.Vector3(...(nd.translation||[0,0,0])),new T.Quaternion(...(nd.rotation||[0,0,0,1])),new T.Vector3(...(nd.scale||[1,1,1])));const M=par.clone().multiply(m);
+  if(nd.mesh!=null)J.meshes[nd.mesh].primitives.forEach(pr=>{if(pr.mode!=null&&pr.mode!=4)return;const A=rd(pr.attributes.POSITION),Nn=pr.attributes.NORMAL!=null?rd(pr.attributes.NORMAL):null,I=pr.indices!=null?rd(pr.indices):[...Array(A.length/3).keys()],P=[],N=[],nm=new T.Matrix3().getNormalMatrix(M),v=new T.Vector3();
+   for(const k of I){v.set(A[k*3],A[k*3+1],A[k*3+2]).applyMatrix4(M);P.push(v.x,v.y,v.z);if(Nn)v.set(Nn[k*3],Nn[k*3+1],Nn[k*3+2]).applyMatrix3(nm).normalize();else v.set(0,0,0);N.push(v.x,v.y,v.z)}
+   const mt=pr.material!=null?J.materials[pr.material]:null,pb=(mt&&mt.pbrMetallicRoughness)||{},bc=pb.baseColorFactor||[.8,.8,.8,1];res.push({P,N,n:nd.name||'GLB',c:bc.slice(0,3).map(x=>Math.pow(x,1/2.2)),r:pb.roughnessFactor==null?1:pb.roughnessFactor,m:pb.metallicFactor==null?0:pb.metallicFactor,a:bc[3]})});(nd.children||[]).forEach(c=>walk(c,M))};
+ J.scenes[J.scene||0].nodes.forEach(i=>walk(i,new T.Matrix4()));return res}
+function importFile(f){const ext=f.name.split('.').pop().toLowerCase(),fr=new FileReader();fr.onload=()=>{try{const k=objs.length,b=snap();let n=0;
+ if(ext=='obj')parseOBJ(fr.result).forEach(g=>{addImp(g.P,g.N,g.n);n++});
+ else if(ext=='stl'){const P=parseSTL(fr.result);if(!P.length)throw Error('STL から面を読み取れませんでした');addImp(P,[0,0,0],f.name.replace(/\.\w+$/,''));n=1}
+ else if(ext=='glb')parseGLB(fr.result).forEach(r=>{const m=addImp(r.P,r.N,r.n);m.material.color.setRGB(...r.c);m.material.roughness=r.r;m.material.metalness=r.m;if(r.a<1){m.material.opacity=r.a;m.material.transparent=true}n++});
+ else throw Error('対応形式は OBJ / STL / GLB です');
+ hist.push(b);fut=[];sel=objs.slice(k);frame(sel);dirty();refresh();toast(`${n}個の物体を読み込みました`)}catch(e){toast(e.message)}};ext=='obj'?fr.readAsText(f):fr.readAsArrayBuffer(f)}
+const fi=document.createElement('input');fi.type='file';fi.accept='.obj,.stl,.glb';fi.multiple=true;fi.hidden=true;document.body.appendChild(fi);fi.onchange=()=>{[...fi.files].forEach(importFile);fi.value=''};
+['dragover','drop'].forEach(t=>vp.addEventListener(t,e=>{e.preventDefault();if(t=='drop')[...e.dataTransfer.files].forEach(importFile)}));
+C('Blender連携','ファイルを読み込む (OBJ / STL / GLB)。画面へドラッグでも可','import open load 読み込み インポート blender',()=>fi.click(),1);
+$('#bl').onclick=()=>openPal('Blender連携');$('#pr').onclick=()=>openPal('3Dプリント');
+/* 3Dプリント診断・修復 */
+function diag(o){const g=world(o),p=g.attributes.position,W=welder(1e-5),id=[],E=new Map(),par={},v=new T.Vector3(),A=new T.Vector3(),B=new T.Vector3(),Dd=new T.Vector3();let open=0,bad=0,vol=0;
+ for(let i=0;i<p.count;i++)id.push(W.id(v.fromBufferAttribute(p,i)));
+ const f=x=>{if(par[x]===undefined)par[x]=x;let r=x;while(par[r]!==r)r=par[r];while(par[x]!==r){const t=par[x];par[x]=r;x=t}return r};
+ for(let i=0;i<id.length;i+=3){for(let k=0;k<3;k++){const a=id[i+k],b=id[i+(k+1)%3];if(a==b)continue;const key=a<b?a+'_'+b:b+'_'+a;E.set(key,(E.get(key)||0)+1);const ra=f(a),rb=f(b);if(ra!=rb)par[rb]=ra}
+  A.fromBufferAttribute(p,i);B.fromBufferAttribute(p,i+1);Dd.fromBufferAttribute(p,i+2);vol+=A.dot(B.clone().cross(Dd))/6}
+ E.forEach(c=>{if(c==1)open++;else if(c>2)bad++});const sh=new Set(id.map(f)).size;return{open,bad,vol,sh}}
+C('3Dプリント','3Dプリント向けの診断 (穴・向き・パーツ数)','check diagnose 診断 水密 manifold 穴 3dprint',()=>{toast(need().filter(o=>!o.userData.light).slice(0,3).map(o=>{const r=diag(o);return`${o.name}: 穴の辺 ${r.open} / 非多様体 ${r.bad} / 独立パーツ ${r.sh} / 体積 ${Math.abs(r.vol).toFixed(2)}${r.vol<0?' (向きが逆)':''} → ${r.open||r.bad||r.vol<0?'要修正':'問題なし'}`}).join(' | '))},1);
+const volOf=g=>{const p=g.attributes.position,A=new T.Vector3(),B=new T.Vector3(),D2=new T.Vector3();let v=0;for(let i=0;i<p.count;i+=3){A.fromBufferAttribute(p,i);B.fromBufferAttribute(p,i+1);D2.fromBufferAttribute(p,i+2);v+=A.dot(B.clone().cross(D2))/6}return v};
+C('3Dプリント','面の向きを外向きにそろえる (体積が負のとき反転)','fix normals orient 向き 修復',()=>eachG(g=>{if(volOf(g)<0)flipG(g)}));
+[.001,.01,.05].forEach(t=>C('3Dプリント',`近い頂点をくっつける (距離 ${t})`,'weld merge vertices 溶接 隙間 修復',()=>eachG(g=>{const p=g.attributes.position,W=welder(t),ids=[],v=new T.Vector3();for(let i=0;i<p.count;i++)ids.push(W.id(v.fromBufferAttribute(p,i)));ids.forEach((id,i)=>p.setXYZ(i,W.pts[id].x,W.pts[id].y,W.pts[id].z))})));
+[20,50,100,150,200].forEach(n=>C('3Dプリント',`最大の辺を ${n}mm にする (1単位=1mm)`,'size mm scale 大きさ',()=>{const L=need(),b=new T.Box3();L.forEach(o=>b.expandByObject(o));const s=sz(b),f=n/Math.max(s.x,s.y,s.z),c=b.getCenter(new T.Vector3());L.forEach(o=>{o.position.sub(c).multiplyScalar(f).add(c);o.scale.multiplyScalar(f)})}));
+C('3Dプリント','底面を印刷台 (地面) に置く','place bed ground 接地',()=>{const b=new T.Box3();need().forEach(o=>b.expandByObject(o));sel.forEach(o=>o.position.y-=b.min.y)});
+
+/* ---------- チュートリアル: ウサギをつくる ---------- */
+const Z={},at=(x,y,z)=>({m:`右パネルの「位置」を (${x}, ${y}, ${z}) にする (矢印ハンドルでも可)`,f:()=>sel[0].position.set(x,y,z)}),sv=k=>({s:k}),FIT='全体を画面に収める';
+const TUT=[
+{t:'まっさらにする',d:'最初に、いまある物体をすべて消して空のシーンにします。間違えても Ctrl+Z で戻せます。',ops:['すべて削除']},
+{t:'からだ (卵形)',d:'図形「卵」を追加して少し大きくし、おなかをふくらませます。色は白、表面は少しざらっとさせて毛のような質感にして、地面に置きます。',ops:['卵を追加','全体を25%大きく','中央をふくらませる 弱','白色にする','表面の粗さ 0.75','地面に置く',FIT]},
+{t:'あたま',d:'「球」を追加して上下を少しつぶし、からだの上に置きます。位置は右パネルの数値か、矢印ハンドル (緑が上下) で変えられます。',ops:['球を追加','Y(上下)方向を20%縮める','白色にする','表面の粗さ 0.75',at(0,2.1,.25)]},
+{t:'みみ (変形のくみあわせ)',d:'「カプセル」を細長く伸ばし、先を細くして曲げ、少し外へ傾けて頭に付けます。拡大縮小・変形・回転を重ねる例です。',ops:['カプセルを追加','X(左右)方向を半分に縮める','Z(前後)方向を半分に縮める','Y(上下)方向を25%伸ばす','先を細くする (少し)','曲げる -45度','Z軸まわり +15度 回転',at(-.38,3.2,.1),'白色にする',sv('earL'),FIT]},
+{t:'みみの内側 (ピンク)',d:'みみを複製して小さくし、ピンク色にして少し手前に出します。複製と色変更の例です。',ops:['複製','全体を25%小さく','桃色にする',at(-.37,3.2,.2),sv('earI')]},
+{t:'みみを右側にもコピー',d:'左耳と内側のピンクを2つ選び、「鏡写しで複製」で右側を作ります。傾きも左右対称になります。',ops:[{m:'左耳と内側のピンクを2つ選ぶ (Shiftを押しながらクリック)',f:()=>{sel=[Z.earL,Z.earI]}},'X(左右)方向に鏡写しで複製']},
+{t:'め',d:'小さな黒い球を作って片目の位置に置き、鏡写しでもう片方の目を作ります。',ops:['球を追加','全体を4分の1に','黒色にする',at(-.22,2.2,.78),'X(左右)方向に鏡写しで複製']},
+{t:'はなとしっぽ',d:'鼻はごく小さな桃色の球です。しっぽは白い球にして、表面を少しゴツゴツさせてふわふわ感を出します。',ops:['球を追加','全体を10分の1に','桃色にする',at(0,2,.84),'球を追加','全体を半分に','白色にする','ゴツゴツさせる 強さ0.05',at(0,.7,-.95)]},
+{t:'うしろ足',d:'「卵」を小さくして平たくし、前後に少し伸ばして足にします。これも鏡写しで両側に置きます。',ops:['卵を追加','全体を半分に','Y(上下)方向を半分に縮める','Z(前後)方向を25%伸ばす','白色にする',at(-.45,.2,.45),'X(左右)方向に鏡写しで複製']},
+{t:'まえ足',d:'小さな白い球を、おなかの前に置いて前足にします。',ops:['球を追加','全体を4分の1に','白色にする',at(-.32,1,.9),'X(左右)方向に鏡写しで複製']},
+{t:'しあげ (見た目)',d:'背景と光の雰囲気を「昼」にして、ゆっくり回転させながら全体を確認します。',ops:['雰囲気: 昼','ターンテーブル: ゆっくり回す',FIT]},
+{t:'1つにまとめる',d:'すべて選択して「結合」すると、色を保ったまま1つの物体になります。以降は、ウサギ全体を1つの物体として扱えます。',ops:['すべて選択','選んだ物体を1つに結合',FIT]},
+{t:'切って、断面を貼り合わせる',d:'前後の中央で切って 1 だけ離し、切り口 (断面) どうしを向きごと貼り合わせて、もう一度1つに結合します。切断と貼り合わせの例です。',ops:['ターンテーブル: 回転を止める','Z(前後)方向の中央で切って 1 離す','断面どうしを向きごと貼り合わせる','選んだ物体を1つに結合',FIT]},
+{t:'3Dプリント用に確認',d:'診断で穴や向きを調べ、最大の辺を 100mm にします。部品どうしが重なっているため、独立パーツの数は部品数になります (多くのスライサーは重なりをそのまま扱えます)。書き出しは「Blender連携」か「3Dプリント」から行います。',ops:['3Dプリント向けの診断 (穴・向き・パーツ数)','最大の辺を 100mm にする (1単位=1mm)',FIT]}
+];
+let ti=-1,tbusy=false;const tp=document.createElement('div');tp.id='tut';vp.appendChild(tp);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function tutExec(i){const s=TUT[i];s.h0=hist.length;for(const op of s.ops){if(typeof op=='string'){const c=CMD.find(x=>x.n==op);if(!c){toast('操作が見つかりません: '+op);continue}run(c)}else if(op.s)Z[op.s]=sel[0];else run({f:op.f});await sleep(350)}}
+function tutDraw(){if(ti<0){tp.style.display='none';return}tp.style.display='block';const s=TUT[ti];
+ if(!s){tp.innerHTML='<b>完成です</b><h4>ウサギができました</h4><p>視点を回して好きな角度から見てみましょう。「Blender連携」から GLB で書き出せば Blender で開けます。ここまでの各操作は、検索ボックスから自分で実行することもできます。</p><div class="tb"><button class="btn alt" id="tr">最初からやり直す</button><button class="btn" id="tx">閉じる</button></div>';return}
+ tp.innerHTML=`<b>ウサギをつくる ${ti+1} / ${TUT.length}</b><h4>${s.t}</h4><p>${s.d}</p><div class="tl">${s.ops.filter(o=>!o.s).map(o=>`<span>${esc(typeof o=='string'?o:o.m)}</span>`).join('')}</div><div class="tb"><button class="btn alt" id="tb"${ti&&!tbusy?'':' disabled'}>前に戻す</button><button class="btn" id="tn"${tbusy?' disabled':''}>${tbusy?'実行中...':'実行して次へ'}</button></div><div class="tb"><button class="btn alt" id="ta"${tbusy?' disabled':''}>最後まで自動で実行</button><button class="btn alt" id="tx">閉じる</button></div>`}
+tp.onclick=async e=>{const id=e.target.id;if(id=='tx'){ti=-1;tutDraw();return}if(tbusy)return;
+ if(id=='tn'){tbusy=true;tutDraw();await tutExec(ti);ti++;tbusy=false;tutDraw()}
+ else if(id=='ta'){tbusy=true;tutDraw();while(ti<TUT.length){await tutExec(ti);ti++;tutDraw();await sleep(500)}tbusy=false;tutDraw()}
+ else if(id=='tb'&&ti>0){ti--;while(hist.length>TUT[ti].h0)undo();tutDraw()}
+ else if(id=='tr'){ti=0;while(hist.length>TUT[0].h0)undo();tutDraw()}};
+function tutStart(){const h=$('#hint');if(h)h.remove();ti=0;tutDraw()}
+$('#tu').onclick=tutStart;
+C('チュートリアル','ウサギをつくる (ステップごとに操作を解説)','tutorial rabbit usagi うさぎ 兎 チュートリアル 作例 サンプル',tutStart,1);
+
+/* ---------- 選択表示・パネル ---------- */
+function syncSel(){BH.forEach(h=>{scene.remove(h);h.geometry.dispose()});BH=sel.map(o=>{const h=new T.BoxHelper(o,0x3ddbbd);scene.add(h);return h})}
+const side=$('#side'),f3=(l,k,v,m)=>`<div class="g3"><label>${l}</label>${['x','y','z'].map(a=>`<input type="number" step="0.1" aria-label="${l}${a.toUpperCase()}" data-k="${k}${a}" value="${+(v[a]*m).toFixed(3)}">`).join('')}</div>`;
+function panel(){const a=sel[sel.length-1];
+ let h=`<h3>オブジェクト (${objs.length})</h3>`+(objs.length?objs.map((o,i)=>`<div class="row${sel.includes(o)?' on':''}" data-i="${i}">${ic(o.userData.light?'light':'cube')}<span>${esc(o.name)}</span><button data-v="${i}" aria-label="表示を切り替え">${ic(o.visible?'eye':'eyeoff')}</button></div>`).join(''):'<div style="color:var(--mu)">まだ何もありません。上の検索ボックスか、左の「追加」ボタンから作れます。</div>');
+ if(a){const m=a.material;h+=`<h3>名前</h3><input data-k="name" value="${esc(a.name)}" aria-label="名前"><h3>位置・回転・大きさ</h3>`+f3('位置','p',a.position,1)+f3('回転','r',a.rotation,180/PI)+f3('大きさ','s',a.scale,1)+
+ `<h3>色と質感</h3><div class="g3"><label>色</label><input type="color" data-k="col" value="#${m.color.getHexString()}" aria-label="色" style="grid-column:2/5"></div><div class="g3"><label>粗さ</label><input type="range" min="0" max="1" step=".01" data-k="rough" value="${m.roughness}" aria-label="粗さ"></div><div class="g3"><label>金属</label><input type="range" min="0" max="1" step=".01" data-k="metal" value="${m.metalness}" aria-label="金属感"></div>`}
+ else h+='<h3>プロパティ</h3><div style="color:var(--mu)">物体をクリックして選ぶと、ここで数値や色を直接変えられます。</div>';
+ side.innerHTML=h}
+side.onclick=e=>{const v=e.target.closest('[data-v]');if(v){const o=objs[+v.dataset.v];o.visible=!o.visible;refresh();return}const r=e.target.closest('[data-i]');if(r){const o=objs[+r.dataset.i];sel=e.shiftKey?(sel.includes(o)?sel.filter(s=>s!==o):[...sel,o]):[o];refresh()}};
+side.addEventListener('focusin',e=>{if(e.target.dataset.k)pend=snap()});
+side.addEventListener('pointerdown',e=>{if(e.target.dataset.k)pend=snap()});
+side.addEventListener('input',e=>{const k=e.target.dataset.k,a=sel[sel.length-1];if(!k||!a)return;const v=e.target.value,n=parseFloat(v);
+ if(k=='name')a.name=v;else if(k=='col')setCol(v,[a]);else if(k=='rough')a.material.roughness=n;else if(k=='metal')a.material.metalness=n;
+ else if(!isNaN(n)){const t={p:a.position,r:a.rotation,s:a.scale}[k[0]];t[k[1]]=k[0]=='r'?n*PI/180:n}});
+side.addEventListener('change',()=>{if(pend){hist.push(pend);fut=[];pend=null}});
+function refresh(){sel=sel.filter(o=>objs.includes(o));syncSel();panel();padDraw();$('#st').textContent=`物体 ${objs.length} / 選択 ${sel.length} / ドラッグ操作: ${{move:'移動',rot:'回転',scl:'拡大縮小'}[tool]}`;$('#cc').textContent=CMD.length+' 個の操作が使えます'}
+
+/* ---------- 左ツールバー ---------- */
+const NV=[['move','sel','選択・移動 (G)'],['rot','rot','回転 (R)'],['scl','scl','拡大縮小 (S)'],0,
+['p:追加','cube','図形を追加'],['p:ライト','light','ライトを追加'],['p:切断','cut','切断・断面'],['p:ブーリアン','join','合体・くり抜き'],['c:複製','copy','複製 (Ctrl+D)'],['c:削除','trash','削除 (Delete)'],0,['u','undo','元に戻す (Ctrl+Z)'],['r','redo','やり直す (Ctrl+Shift+Z)']];
+$('#nv').innerHTML=NV.map(x=>x?`<button data-t="${x[0]}" aria-label="${x[2]}" title="${x[2]}">${ic(x[1])}</button>`:'<hr>').join('');
+function setTool(t){tool=t;document.querySelectorAll('#nv [data-t]').forEach(b=>b.classList.toggle('on',b.dataset.t==t));refresh()}
+$('#nv').onclick=e=>{const b=e.target.closest('[data-t]');if(!b)return;const t=b.dataset.t;if(t=='move'||t=='rot'||t=='scl')setTool(t);else if(t=='u')undo();else if(t=='r')redo();else if(t[0]=='p')openPal(t.slice(2));else run(CMD.find(c=>c.n==t.slice(2)))};
+$('#ex').onclick=()=>shot(2,0);
+
+/* ---------- パレット ---------- */
+const pal=$('#pal'),q=$('#q'),res=$('#res'),cats=$('#cats'),CATS=[...new Set(CMD.map(c=>c.c))];
+let pc='すべて',pi=0,pl=[];
+function openPal(c){pc=c||'すべて';q.value='';pi=0;pal.classList.add('on');drawPal();q.focus()}
+function drawPal(){const t=q.value.toLowerCase().split(/\s+/).filter(Boolean);pl=CMD.filter(c=>(pc=='すべて'||c.c==pc)&&t.every(w=>c.k.includes(w)));pi=Math.min(pi,Math.max(pl.length-1,0));
+ cats.innerHTML=['すべて',...CATS].map(c=>`<button class="${c==pc?'on':''}" data-c="${c}">${c}</button>`).join('');
+ res.innerHTML=pl.slice(0,120).map((c,i)=>`<div class="it${i==pi?' on':''}" data-i="${i}">${ic(CI[c.c]||'cube')}<span>${c.n}</span><small>${c.c}</small></div>`).join('')||'<div class="it" style="color:var(--mu)">見つかりません。別の言葉で試してください (例: 赤 / 回転 / 複製 / 球)</div>';
+ const a=res.querySelector('.on');if(a)a.scrollIntoView({block:'nearest'})}
+const closeAll=()=>{pal.classList.remove('on');$('#pv').classList.remove('on')};
+const execPal=i=>{const c=pl[i];closeAll();run(c)};
+q.oninput=()=>{pi=0;drawPal()};
+cats.onclick=e=>{const c=e.target.dataset.c;if(c){pc=c;pi=0;drawPal();q.focus()}};
+res.onclick=e=>{const i=e.target.closest('.it');if(i&&i.dataset.i!=null)execPal(+i.dataset.i)};
+[pal,$('#pv')].forEach(m=>m.addEventListener('pointerdown',e=>{if(e.target==m)closeAll()}));
+$('#pc').onclick=closeAll;$('#sb').onclick=()=>openPal();$('#hx').onclick=()=>$('#hint').remove();
+$('#sb').innerHTML=ic('search')+'<span>やりたいことを検索して実行</span><kbd>Ctrl+K</kbd>';
+/* ---------- キーボード ---------- */
+addEventListener('keydown',e=>{const typing=['INPUT','SELECT'].includes(e.target.tagName),k=e.key.toLowerCase(),c=e.ctrlKey||e.metaKey;
+ if(c&&k=='k'||(!typing&&e.key=='/')){e.preventDefault();openPal();return}
+ if(k=='escape'){closeAll();return}
+ if(pal.classList.contains('on')){if(k=='arrowdown'||k=='arrowup'){e.preventDefault();pi=clamp(pi+(k=='arrowdown'?1:-1),0,Math.max(pl.length-1,0));drawPal()}else if(k=='enter'){e.preventDefault();execPal(pi)}return}
+ if(typing)return;
+ const by=n=>run(CMD.find(x=>x.n==n)),ar={arrowleft:['x',-1],arrowright:['x',1],arrowup:['z',-1],arrowdown:['z',1],pageup:['y',1],pagedown:['y',-1]}[k];
+ if(c&&k=='z'){e.preventDefault();e.shiftKey?redo():undo()}else if(c&&k=='y'){e.preventDefault();redo()}else if(c&&k=='d'){e.preventDefault();by('複製')}
+ else if(k=='delete'||k=='backspace')by('削除');else if(k=='g')setTool('move');else if(k=='r'&&!c)setTool('rot');else if(k=='s'&&!c)setTool('scl');
+ else if(k=='f')by('選んだ物体を画面に収める');else if(k=='a'&&!c)by('すべて選択');
+ else if(ar){e.preventDefault();run({f:()=>need().forEach(o=>o.position[ar[0]]+=ar[1]*.5)})}});
+
+/* ---------- ビューポート操作 ---------- */
+const ray=new T.Raycaster(),mv=new T.Vector2(),gp=new T.Plane(Y,0);let dr=null;
+function ndc(e){const r=cv.getBoundingClientRect();mv.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height*2-1));ray.setFromCamera(mv,cam)}
+const pickAt=e=>{ndc(e);const h=ray.intersectObjects(objs.filter(o=>o.visible),false)[0];return h&&h.object},hitPlane=e=>{ndc(e);const p=new T.Vector3();return ray.ray.intersectPlane(gp,p)?p:null};
+cv.addEventListener('contextmenu',e=>e.preventDefault());
+cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);let o=e.button==0?pickAt(e):null;dr={x:e.clientX,y:e.clientY,o,b:e.button,sh:e.shiftKey,moved:false};
+ if(o){if(e.shiftKey&&sel.includes(o)){sel=sel.filter(s=>s!==o);refresh();dr.o=null;return}
+  if(!sel.includes(o)){sel=e.shiftKey?[...sel,o]:[o];refresh()}
+  dr.pre=snap();gp.constant=-o.position.y;dr.p0=hitPlane(e);dr.st=sel.map(s=>s.position.clone())}});
+cv.addEventListener('pointermove',e=>{if(!dr)return;if(!dr.moved&&Math.hypot(e.clientX-dr.x,e.clientY-dr.y)<3)return;dr.moved=true;const mx=e.movementX||0,my=e.movementY||0;
+ if(dr.o){if(tool=='move'){const p=hitPlane(e);if(p&&dr.p0)sel.forEach((s,i)=>{s.position.x=dr.st[i].x+p.x-dr.p0.x;s.position.z=dr.st[i].z+p.z-dr.p0.z})}
+  else if(tool=='rot')sel.forEach(s=>{s.rotation.y+=mx*.01;s.rotation.x+=my*.01});
+  else{const f=1-my*.01;sel.forEach(s=>s.scale.multiplyScalar(f))}}
+ else if(dr.b==0&&!e.shiftKey){cs.th-=mx*.008;cs.ph=clamp(cs.ph-my*.008,.05,PI-.05)}
+ else{const r=new T.Vector3().setFromMatrixColumn(cam.matrix,0),u=new T.Vector3().setFromMatrixColumn(cam.matrix,1),k=cs.r*.0015;cs.t.addScaledVector(r,-mx*k).addScaledVector(u,my*k)}});
+cv.addEventListener('pointerup',()=>{if(!dr)return;if(dr.o&&dr.moved){hist.push(dr.pre);fut=[];refresh()}else if(!dr.moved&&dr.b==0&&!dr.o&&!dr.sh){sel=[];refresh()}dr=null});
+cv.addEventListener('wheel',e=>{e.preventDefault();cs.r=clamp(cs.r*Math.exp(e.deltaY*.001),1,80)},{passive:false});
+
+/* ---------- 起動 ---------- */
+addShape('sph');col('#3a7bd5');addShape('box');col('#ff9f1c');addShape('tor');col('#ff4d9d');sel=[];
+setTool('move');
+let last=performance.now();
+(function loop(t){requestAnimationFrame(loop);const dt=Math.min((t-last)/1000,.1);last=t;if(turn)cs.th+=turn*dt;placeCam();BH.forEach(h=>h.update());gzUpdate();R.render(scene,cam)})(last);
+</script>
+</body>
+</html>
