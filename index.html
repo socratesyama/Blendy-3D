@@ -5,10 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Blendy 3D</title>
 <style>
-:root{--bg:#161a24;--p:#1d2230;--p2:#283044;--ln:#363f56;--tx:#e9edf6;--mu:#8e99b3;--ac:#3ddbbd;--on:#07201b;color-scheme:dark}
+:root{--bg:#161a24;--p:#1d2230;--p2:#283044;--ln:#363f56;--tx:#e9edf6;--mu:#8e99b3;--ac:#3ddbbd;--on:#07201b;--glass:rgba(29,34,48,.94);--select:#17403c;--modal-dim:rgba(5,8,14,.6);--shadow:rgba(0,0,0,.55);color-scheme:dark}
+:root[data-theme="light"]{--bg:#f3f6fa;--p:#fff;--p2:#e9eef5;--ln:#cbd5e1;--tx:#1e293b;--mu:#637187;--ac:#078574;--on:#fff;--glass:rgba(255,255,255,.96);--select:#d9f3ed;--modal-dim:rgba(20,30,45,.36);--shadow:rgba(25,38,55,.2);color-scheme:light}
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;overflow:hidden}
-body{display:grid;grid-template:44px 1fr 24px/52px 1fr 288px;font:13px/1.45 system-ui,"Hiragino Sans","Noto Sans JP",sans-serif;background:var(--bg);color:var(--tx)}
+body{display:grid;grid-template:44px 1fr 24px/174px 1fr 288px;font:13px/1.45 system-ui,"Hiragino Sans","Noto Sans JP",sans-serif;background:var(--bg);color:var(--tx)}
 svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 :focus-visible{outline:2px solid var(--ac);outline-offset:1px}
@@ -20,19 +21,40 @@ header{grid-column:1/4;display:flex;align-items:center;gap:12px;padding:0 12px;b
 #sb kbd{margin-left:auto}
 kbd{font:11px ui-monospace,monospace;border:1px solid var(--ln);border-radius:4px;padding:0 5px}
 .btn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;background:var(--ac);color:var(--on);font-weight:700;text-decoration:none}
-nav{background:var(--p);border-right:1px solid var(--ln);display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 0;overflow:auto}
-nav button{width:38px;height:38px;border-radius:8px;display:grid;place-items:center;color:var(--mu);flex:none}
+nav{background:var(--p);border-right:1px solid var(--ln);display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:10px 8px;overflow:auto}
+nav button{width:100%;min-height:42px;border-radius:8px;display:flex;align-items:center;gap:10px;padding:6px 9px;text-align:left;color:var(--mu);flex:none}
 nav button:hover{background:var(--p2);color:var(--tx)}
 nav button.on{background:var(--ac);color:var(--on)}
-nav hr{width:28px;border:0;border-top:1px solid var(--ln);margin:4px 0}
+nav hr{width:100%;border:0;border-top:1px solid var(--ln);margin:5px 0}
+.nav-head{padding:7px 8px 2px;color:var(--mu);font-size:11px;font-weight:700;letter-spacing:.04em}
+.nav-copy{display:flex;flex-direction:column;min-width:0;line-height:1.25}
+.nav-copy b{font-size:12px;font-weight:650;color:inherit}
+.nav-copy small{margin-top:2px;font-size:10px;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+nav button.on .nav-copy small{color:inherit;opacity:.8}
+.nav-spacer{flex:1;min-height:12px}
 #vp{position:relative;min-width:0;min-height:0}
 #vp canvas{display:block;width:100%;height:100%;touch-action:none}
+#scene-guides{position:absolute;right:12px;bottom:12px;z-index:2;width:min(226px,calc(100% - 24px));padding:9px;background:var(--glass);border:1px solid var(--ln);border-radius:10px;box-shadow:0 8px 24px var(--shadow)}
+#scene-guides .guide-head{display:flex;align-items:center;justify-content:space-between;margin:0 3px 6px;font-size:12px;color:var(--tx);font-weight:700}
+#scene-guides .guide-head small{font-size:10px;color:var(--mu);font-weight:400}
+#scene-guides .guide-head button{width:auto;padding:3px 7px;border:1px solid var(--ln);border-radius:5px;color:var(--ac);font-size:10px;font-weight:600}
+#coord-readout{border-top:1px solid var(--ln);margin:5px 2px 0;padding:6px 2px 1px;color:var(--mu);font:10px/1.4 ui-monospace,monospace;text-align:center}
+#scene-guides button{display:flex;align-items:center;gap:8px;width:100%;padding:6px;border-radius:7px;text-align:left}
+#scene-guides button:hover{background:var(--p2)}
+#scene-guides button[aria-pressed="false"]{opacity:.65}
+#scene-guides .guide-swatch{width:12px;height:12px;border-radius:3px;flex:none}
+#scene-guides .guide-swatch.z{background:#5798ff;box-shadow:0 0 0 2px rgba(87,152,255,.2)}
+#scene-guides .guide-swatch.ground{background:#aab3c4;box-shadow:0 0 0 2px rgba(170,179,196,.18)}
+#scene-guides .guide-label{display:flex;flex:1;flex-direction:column;line-height:1.2}
+#scene-guides .guide-label b{font-size:12px}
+#scene-guides .guide-label small{margin-top:2px;color:var(--mu);font-size:10px}
+#scene-guides .guide-state{color:var(--ac);font-size:10px;white-space:nowrap}
 aside{background:var(--p);border-left:1px solid var(--ln);overflow:auto;padding:10px}
 aside h3{margin:14px 0 6px;font-size:12px;color:var(--mu);font-weight:600}
 aside h3:first-child{margin-top:0}
 .row{display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:6px;cursor:pointer}
 .row:hover{background:var(--p2)}
-.row.on{background:#17403c;outline:1px solid var(--ac)}
+.row.on{background:var(--select);outline:1px solid var(--ac)}
 .row span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .row button{color:var(--mu)}
 .g3{display:grid;grid-template-columns:34px 1fr 1fr 1fr;gap:4px;align-items:center;margin-bottom:4px}
@@ -44,13 +66,13 @@ footer{grid-column:1/4;display:flex;align-items:center;gap:16px;padding:0 12px;b
 footer span:last-child{margin-left:auto}
 #toast{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);background:var(--p2);border:1px solid var(--ln);padding:8px 14px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:92%;text-align:center}
 #toast.on{opacity:1}
-#hint{position:absolute;left:12px;top:12px;max-width:300px;background:rgba(29,34,48,.94);border:1px solid var(--ln);border-radius:10px;padding:12px 14px;color:var(--mu)}
+#hint{position:absolute;left:12px;top:12px;max-width:300px;background:var(--glass);border:1px solid var(--ln);border-radius:10px;padding:12px 14px;color:var(--mu)}
 #hint b{color:var(--tx)}
 #hint p{margin:6px 0}
 #hint button{margin-top:4px;color:var(--ac);padding:0}
-.modal{position:fixed;inset:0;background:rgba(5,8,14,.6);display:none;justify-content:center;align-items:flex-start;padding-top:9vh;z-index:9}
+.modal{position:fixed;inset:0;background:var(--modal-dim);display:none;justify-content:center;align-items:flex-start;padding-top:9vh;z-index:9}
 .modal.on{display:flex}
-.box{width:min(640px,94vw);background:var(--p);border:1px solid var(--ln);border-radius:12px;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.55)}
+.box{width:min(640px,94vw);background:var(--p);border:1px solid var(--ln);border-radius:12px;overflow:hidden;box-shadow:0 24px 70px var(--shadow)}
 #q{border:0;border-bottom:1px solid var(--ln);border-radius:0;padding:14px 16px;font-size:16px}
 #cats{display:flex;gap:6px;overflow-x:auto;padding:8px 12px;border-bottom:1px solid var(--ln)}
 #cats button{padding:3px 10px;border-radius:99px;border:1px solid var(--ln);color:var(--mu);white-space:nowrap}
@@ -60,8 +82,8 @@ footer span:last-child{margin-left:auto}
 #res .it.on{background:var(--p2)}
 #res small{margin-left:auto;color:var(--mu)}
 #pimg{max-width:100%;max-height:60vh;display:block;margin:auto;background:repeating-conic-gradient(#555 0 25%,#444 0 50%) 0 0/16px 16px}
-@media(max-width:760px){body{grid-template:44px 1fr 40vh 24px/52px 1fr}header,footer{grid-column:1/3}aside{grid-column:1/3;border-left:0;border-top:1px solid var(--ln)}#sb span{display:none}#hint{display:none}}
-#pad{position:absolute;left:12px;bottom:12px;background:rgba(29,34,48,.94);border:1px solid var(--ln);border-radius:10px;padding:8px;display:none;min-width:158px}
+@media(max-width:760px){body{grid-template:44px 1fr 40vh 24px/148px 1fr}header,footer{grid-column:1/3}aside{grid-column:1/3;border-left:0;border-top:1px solid var(--ln)}#sb span{display:none}#hint{display:none}nav{padding:8px 6px}nav button{min-height:38px;gap:7px;padding:5px 7px}.nav-copy small{font-size:9px}#scene-guides{right:8px;bottom:8px;width:min(218px,calc(100% - 16px));padding:7px}}
+#pad{position:absolute;left:12px;bottom:12px;background:var(--glass);border:1px solid var(--ln);border-radius:10px;padding:8px;display:none;min-width:158px}
 #pad .ph{display:flex;align-items:center;gap:6px;margin-bottom:4px}
 #pad select{width:auto;padding:2px 4px;background:var(--bg);color:var(--tx);border:1px solid var(--ln);border-radius:6px;font:inherit}
 #pad .pr{display:flex;align-items:center;gap:6px;margin-top:4px}
@@ -69,7 +91,7 @@ footer span:last-child{margin-left:auto}
 #pad button{width:36px;height:30px;border:1px solid var(--ln);border-radius:6px;display:grid;place-items:center}
 #pad button:hover{background:var(--p2);border-color:var(--ac)}
 .btn.alt{background:var(--p2);color:var(--tx)}
-#tut{position:absolute;right:12px;top:12px;width:min(320px,92%);background:rgba(29,34,48,.96);border:1px solid var(--ln);border-radius:10px;padding:12px 14px;display:none;max-height:calc(100% - 24px);overflow:auto}
+#tut{position:absolute;right:12px;top:12px;width:min(320px,92%);background:var(--glass);border:1px solid var(--ln);border-radius:10px;padding:12px 14px;display:none;max-height:calc(100% - 24px);overflow:auto}
 #tut h4{margin:6px 0 4px;font-size:15px}
 #tut p{margin:4px 0;color:var(--mu)}
 #tut .tl{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0}
@@ -79,11 +101,12 @@ footer span:last-child{margin-left:auto}
 #tut .btn[disabled]{opacity:.5;cursor:default}
 @media(max-width:760px){#pad{bottom:auto;top:12px}}
 </style>
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('blendy-theme')==='light'?'light':'dark'}catch{document.documentElement.dataset.theme='dark'}</script>
 </head>
 <body>
 <header>
   <div class="logo" id="lg"></div>
-  <button id="sb" aria-label="コマンドを検索"></button>
+  <button id="sb" aria-label="操作を一覧・検索"></button>
   <button class="btn" id="ex"></button>
   <button class="btn alt" id="tu">ウサギを作る</button>
   <button class="btn alt" id="bl">Blender連携</button>
@@ -92,17 +115,28 @@ footer span:last-child{margin-left:auto}
 <nav id="nv"></nav>
 <main id="vp">
   <div id="hint"><b>はじめに</b>
-    <p>上の検索ボックス (Ctrl+K) に「球」「赤」「回転」「複製」などを入力して選ぶだけで操作できます。</p>
+    <p>左のツールバーから図形・色・素材・配置などを選び、カテゴリ内の操作を一覧から実行できます。上の検索 (Ctrl+K) は操作名が分かるときに便利です。</p>
     <p>物体を選ぶと矢印や輪のハンドルが出ます。ドラッグで移動・回転・拡大縮小 (上下の移動は緑の矢印)。左下のボタンでも動かせます。空白のドラッグで視点回転、右ドラッグで平行移動、ホイールで拡大縮小。</p>
-    <p>できあがったら右上の「PNG書き出し」へ。</p>
+    <p>右下では垂直な Z=0 (XY) 面と水平な Y=0 (XZ) 床を個別に切替。正面ビューとカーソル座標も確認できます。</p>
+    <p>右上からPNG出力、左ツールバーの下からライト／ダーク表示を選べます。</p>
     <button id="hx">閉じる</button></div>
+  <div id="scene-guides" aria-label="座標基準面">
+    <div class="guide-head"><span>座標ガイド</span><button id="zFront" title="Z=0面を正面から見る">正面ビュー</button></div>
+    <button id="zGuideToggle" aria-pressed="true" title="Z=0の垂直基準面を表示／非表示">
+      <span class="guide-swatch z"></span><span class="guide-label"><b>Z = 0</b><small>垂直のXY基準面</small></span><span class="guide-state">表示中</span>
+    </button>
+    <button id="groundGuideToggle" aria-pressed="true" title="Y=0の床グリッドを表示／非表示">
+      <span class="guide-swatch ground"></span><span class="guide-label"><b>Y = 0</b><small>水平のXZ床グリッド</small></span><span class="guide-state">表示中</span>
+    </button>
+    <div id="coord-readout">Z = 0 上の座標: キャンバスにポインターを移動</div>
+  </div>
   <div id="toast"></div>
 </main>
 <aside id="side"></aside>
 <footer><span id="st"></span><span id="cc"></span></footer>
 
 <div class="modal" id="pal"><div class="box">
-  <input id="q" placeholder="やりたいことを入力 (例: 赤 / 回転 / 球 / 複製)" autocomplete="off" aria-label="コマンド検索">
+  <input id="q" placeholder="操作名で検索。検索せずカテゴリからも選べます (例: 球 / 赤 / 回転)" autocomplete="off" aria-label="操作名で検索">
   <div id="cats"></div><div id="res"></div>
 </div></div>
 
@@ -154,7 +188,12 @@ const sun=new T.DirectionalLight(0xffffff,.9);sun.position.set(6,9,5);sun.castSh
 Object.assign(sun.shadow.camera,{left:-12,right:12,top:12,bottom:-12,near:1,far:40});
 const grid=new T.GridHelper(24,24,0x5d6882,0x3c4459),axes=new T.AxesHelper(2.5);
 const floor=new T.Mesh(new T.PlaneGeometry(60,60).rotateX(-PI/2),new T.ShadowMaterial({opacity:.3}));floor.receiveShadow=true;floor.position.y=-.001;
-scene.add(amb,sun,grid,axes,floor);
+const zGuide=new T.Group();zGuide.name='Z=0 XY基準面';
+const zPlane=new T.Mesh(new T.PlaneGeometry(24,24),new T.MeshBasicMaterial({color:0x5798ff,transparent:true,opacity:.055,side:T.DoubleSide,depthWrite:false}));zPlane.name='Z=0 半透明面';
+const zGrid=new T.GridHelper(24,24,0x5798ff,0x7299d4);zGrid.rotation.x=PI/2;zGrid.position.z=.006;zGrid.renderOrder=2;(Array.isArray(zGrid.material)?zGrid.material:[zGrid.material]).forEach(m=>{m.transparent=true;m.opacity=.42;m.depthWrite=false});
+const zEdge=new T.LineLoop(new T.BufferGeometry().setFromPoints([new T.Vector3(-12,-12,0),new T.Vector3(12,-12,0),new T.Vector3(12,12,0),new T.Vector3(-12,12,0)]),new T.LineBasicMaterial({color:0x5798ff,transparent:true,opacity:.9,depthTest:false}));zEdge.position.z=.012;zEdge.renderOrder=3;
+zGuide.add(zPlane,zGrid,zEdge);
+scene.add(amb,sun,grid,axes,floor,zGuide);
 const cs={t:new T.Vector3(0,.8,0),th:.8,ph:1.1,r:9};
 function placeCam(){cam.position.set(cs.t.x+cs.r*Math.sin(cs.ph)*Math.sin(cs.th),cs.t.y+cs.r*Math.cos(cs.ph),cs.t.z+cs.r*Math.sin(cs.ph)*Math.cos(cs.th));cam.lookAt(cs.t)}
 new ResizeObserver(()=>{const w=vp.clientWidth,h=vp.clientHeight;R.setPixelRatio(devicePixelRatio);R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}).observe(vp);
@@ -236,6 +275,7 @@ C('配置','回転をリセット','reset rotation',()=>need().forEach(o=>o.rota
 C('配置','大きさをリセット','reset scale',()=>need().forEach(o=>o.scale.set(1,1,1)));
 C('配置','すべてリセット','reset all',()=>need().forEach(o=>{o.position.set(0,0,0);o.rotation.set(0,0,0);o.scale.set(1,1,1)}));
 C('配置','地面に置く','ground floor 接地',()=>need().forEach(o=>{o.position.y-=new T.Box3().setFromObject(o).min.y}));
+C('配置','中心をZ=0面に揃える','align center z=0 plane',()=>need().forEach(o=>{const b=new T.Box3().setFromObject(o);o.position.z-=b.getCenter(new T.Vector3()).z}));
 C('配置','原点へ移動','origin center',()=>need().forEach(o=>{o.position.x=0;o.position.z=0}));
 AX.forEach(([a,A,w])=>C('配置',`${A}=0 に揃える`,'align center 揃える',()=>need().forEach(o=>o.position[a]=0)));
 [.5,1,2].forEach(g=>C('配置',`位置を ${g} 刻みに整える`,'snap grid',()=>need().forEach(o=>['x','y','z'].forEach(a=>o.position[a]=Math.round(o.position[a]/g)*g))));
@@ -298,7 +338,8 @@ C('ライト','選んだライトを点灯','light on',()=>need().forEach(o=>o.u
 [['グレー','#2b3144'],['黒','#0b0d12'],['白','#f2f4f8'],['空色','#8ec9ee'],['夕焼け','#f0a46b'],['夜空','#10162e'],['草原','#6b9a62'],['青','#2d5bd1'],['ピンク','#f4a6c0'],['紫','#4a3a7a'],['ベージュ','#e6d9c2'],['深緑','#1c3a2e']].forEach(([n,h])=>C('シーン','背景を'+n+'に','background 背景色',()=>{bg=h;scene.background=new T.Color(h);if(scene.fog)scene.fog.color.set(h)},1));
 [['近め',6,24],['ふつう',12,40],['遠め',20,70]].forEach(([n,a,b])=>C('シーン','霧をつける ('+n+')','fog 霧',()=>{scene.fog=new T.Fog(bg,a,b);dirty()},1));
 C('シーン','霧を消す','fog off',()=>{scene.fog=null;dirty()},1);
-C('シーン','グリッド表示切替','grid toggle',()=>{grid.visible=!grid.visible},1);
+C('シーン','Z=0の基準面を表示切替','z=0 xy vertical plane guide 基準面 垂直 XY',()=>{zGuide.visible=!zGuide.visible},1);
+C('シーン','グリッド表示切替','y=0 ground floor grid 水平 床',()=>{grid.visible=!grid.visible},1);
 C('シーン','座標軸表示切替','axes toggle',()=>{axes.visible=!axes.visible},1);
 C('シーン','地面の影切替','floor shadow toggle',()=>{floor.visible=!floor.visible},1);
 [0,.4,.9,1.5,2.2].forEach(v=>C('シーン',`太陽光の強さ ${v}`,'sun intensity',()=>{sun.intensity=v},1));
@@ -318,7 +359,7 @@ C('カメラ','全体を画面に収める','frame all',()=>frame([]),1);
 [20,35,50,75,100].forEach(v=>C('カメラ',`画角 ${v}度`,'fov lens 広角 望遠',()=>{cam.fov=v;cam.updateProjectionMatrix()},1));
 [['ゆっくり回す',.3],['ふつうに回す',.7],['速く回す',1.6],['回転を止める',0]].forEach(([n,v])=>C('カメラ','ターンテーブル: '+n,'turntable auto rotate 自動回転',()=>{turn=v},1));
 /* 書き出し */
-function shot(s,tr){const w=vp.clientWidth,h=vp.clientHeight,k=Math.min(s,8192/Math.max(w,h)),hid=[grid,axes,GZ,...BH],vis=hid.map(x=>x.visible),ob=scene.background;
+function shot(s,tr){const w=vp.clientWidth,h=vp.clientHeight,k=Math.min(s,8192/Math.max(w,h)),hid=[grid,axes,zGuide,GZ,...BH],vis=hid.map(x=>x.visible),ob=scene.background;
  hid.forEach(x=>x.visible=false);if(tr)scene.background=null;R.setPixelRatio(k);R.render(scene,cam);const url=cv.toDataURL('image/png');
  scene.background=ob;hid.forEach((x,i)=>x.visible=vis[i]);R.setPixelRatio(devicePixelRatio);
  $('#pimg').src=url;$('#pd').href=url;$('#pz').textContent=Math.round(w*k)+' x '+Math.round(h*k)+' px';$('#pv').classList.add('on')}
@@ -545,7 +586,7 @@ cv.addEventListener('pointerup',e=>{if(!gd)return;e.stopImmediatePropagation();i
 C('シーン','ギズモ (ドラッグ用ハンドル) 表示切替','gizmo handle toggle ハンドル',()=>{gzOn=!gzOn},1);
 /* ---------- 位置・回転・大きさのボタン (Z方向もボタンで) ---------- */
 const pad=document.createElement('div');pad.id='pad';vp.appendChild(pad);
-Object.assign(IC,{al:'M19 12H5M11 6l-6 6 6 6',ar:'M5 12h14M13 6l6 6-6 6',au:'M12 19V5M6 11l6-6 6 6',ad:'M12 5v14M6 13l6 6 6-6',af:'M6 18L18 6M9 6h9v9',an:'M18 6L6 18M15 18H6V9',plus:'M5 12h14M12 5v14',minus:'M5 12h14',cut:'M12 3l8 4.5v9L12 21l-8-4.5v-9zM2 12h20',join:'M3 8h7v8H3zM14 8h7v8h-7zM10 12h4'});
+Object.assign(IC,{al:'M19 12H5M11 6l-6 6 6 6',ar:'M5 12h14M13 6l6 6-6 6',au:'M12 19V5M6 11l6-6 6 6',ad:'M12 5v14M6 13l6 6 6-6',af:'M6 18L18 6M9 6h9v9',an:'M18 6L6 18M15 18H6V9',plus:'M5 12h14M12 5v14',minus:'M5 12h14',cut:'M12 3l8 4.5v9L12 21l-8-4.5v-9zM2 12h20',join:'M3 8h7v8H3zM14 8h7v8h-7zM10 12h4',sun:'M12 3v2M12 19v2M3 12h2M19 12h2M5.64 5.64l1.42 1.42m9.88 9.88 1.42 1.42m0-12.72-1.42 1.42m-9.88 9.88-1.42 1.42M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z',moon:'M20.5 15.5A8.5 8.5 0 0 1 8.5 3.5 8.5 8.5 0 1 0 20.5 15.5z'});
 Object.assign(CI,{チュートリアル:'cube',切断:'cut',結合:'join',整列:'grid',生成:'cube',調べる:'search',ブーリアン:'join','Blender連携':'img','3Dプリント':'cube',読み込み:'img'});
 const pstep={move:.5,rot:15,scl:1.25},PS={move:[.1,.25,.5,1,2,5],rot:[5,15,45,90],scl:[1.1,1.25,1.5,2]};
 function rotAbout(L,ax,an){const q=new T.Quaternion().setFromAxisAngle(ax,an);let p=null;if(L.length>1){const b=new T.Box3();L.forEach(o=>b.expandByObject(o));p=b.getCenter(new T.Vector3())}L.forEach(o=>{if(p)o.position.sub(p).applyQuaternion(q).add(p);o.quaternion.premultiply(q)})}
@@ -711,14 +752,22 @@ side.addEventListener('input',e=>{const k=e.target.dataset.k,a=sel[sel.length-1]
  if(k=='name')a.name=v;else if(k=='col')setCol(v,[a]);else if(k=='rough')a.material.roughness=n;else if(k=='metal')a.material.metalness=n;
  else if(!isNaN(n)){const t={p:a.position,r:a.rotation,s:a.scale}[k[0]];t[k[1]]=k[0]=='r'?n*PI/180:n}});
 side.addEventListener('change',()=>{if(pend){hist.push(pend);fut=[];pend=null}});
-function refresh(){sel=sel.filter(o=>objs.includes(o));syncSel();panel();padDraw();$('#st').textContent=`物体 ${objs.length} / 選択 ${sel.length} / ドラッグ操作: ${{move:'移動',rot:'回転',scl:'拡大縮小'}[tool]}`;$('#cc').textContent=CMD.length+' 個の操作が使えます'}
+function syncGuideControls(){[['#zGuideToggle',zGuide],['#groundGuideToggle',grid]].forEach(([id,o])=>{const b=$(id);b.setAttribute('aria-pressed',String(o.visible));b.querySelector('.guide-state').textContent=o.visible?'表示中':'非表示'})}
+function refresh(){sel=sel.filter(o=>objs.includes(o));syncSel();panel();padDraw();syncGuideControls();$('#st').textContent=`物体 ${objs.length} / 選択 ${sel.length} / ドラッグ操作: ${{move:'移動',rot:'回転',scl:'拡大縮小'}[tool]}`;$('#cc').textContent=CMD.length+' 個の操作が使えます'}
+$('#scene-guides').onclick=e=>{const b=e.target.closest('button');if(!b)return;const name={zGuideToggle:'Z=0の基準面を表示切替',groundGuideToggle:'グリッド表示切替',zFront:'正面から見る'}[b.id],c=CMD.find(x=>x.n==name);if(c)run(c)};
 
 /* ---------- 左ツールバー ---------- */
-const NV=[['move','sel','選択・移動 (G)'],['rot','rot','回転 (R)'],['scl','scl','拡大縮小 (S)'],0,
-['p:追加','cube','図形を追加'],['p:ライト','light','ライトを追加'],['p:切断','cut','切断・断面'],['p:ブーリアン','join','合体・くり抜き'],['c:複製','copy','複製 (Ctrl+D)'],['c:削除','trash','削除 (Delete)'],0,['u','undo','元に戻す (Ctrl+Z)'],['r','redo','やり直す (Ctrl+Shift+Z)']];
-$('#nv').innerHTML=NV.map(x=>x?`<button data-t="${x[0]}" aria-label="${x[2]}" title="${x[2]}">${ic(x[1])}</button>`:'<hr>').join('');
+const NV=[
+ {head:'モデリング'},['move','sel','選択・移動','選択してドラッグ (G)'],['rot','rot','回転','回転ハンドル (R)'],['scl','scl','拡大縮小','サイズ変更 (S)'],
+ {head:'作成・編集'},['p:追加','cube','図形を追加','図形一覧から選ぶ'],['p:テンプレート','cube','テンプレート','作例をすぐ配置'],['p:ライト','light','ライト','照明を追加・調整'],['c:複製','copy','複製','Ctrl+D'],['c:削除','trash','削除','Delete'],['p:色','sphere','色','色を選んで適用'],['p:素材','wave','素材','質感・模様を選ぶ'],['p:変形','wave','変形','曲げる・ゆがめる'],['p:切断','cut','切断','平面・分割・断面'],['p:ブーリアン','join','ブーリアン','合体・くり抜き'],['p:配置','grid','配置','整列・スナップ・リセット'],
+ {head:'シーン・出力'},['p:シーン','eye','シーン','背景・照明・グリッド'],['p:カメラ','cam','カメラ','視点・ズームを調整'],['p:書き出し','img','書き出し','PNG・3D形式を保存'],['p:調べる','search','寸法・調べる','サイズや面数を確認'],
+ {head:'履歴'},['u','undo','元に戻す','Ctrl+Z'],['r','redo','やり直す','Ctrl+Shift+Z'],['all','search','すべての操作','カテゴリ別に一覧から選ぶ']
+];
+$('#nv').innerHTML=NV.map(x=>x.head?`<div class="nav-head">${x.head}</div>`:`<button data-t="${x[0]}" aria-label="${x[2]}: ${x[3]}" title="${x[2]} — ${x[3]}">${ic(x[1])}<span class="nav-copy"><b>${x[2]}</b><small>${x[3]}</small></span></button>`).join('')+'<div class="nav-spacer"></div><button id="theme" data-t="theme"></button>';
+function applyTheme(t){document.documentElement.dataset.theme=t;try{localStorage.setItem('blendy-theme',t)}catch{}const b=$('#theme'),title=t==='dark'?'ライトモード':'ダークモード',desc=t==='dark'?'明るい配色に切替':'暗い配色に切替';b.innerHTML=ic(t==='dark'?'sun':'moon')+`<span class="nav-copy"><b>${title}</b><small>${desc}</small></span>`;b.setAttribute('aria-label',title);b.title=title+'に切替'}
+applyTheme(document.documentElement.dataset.theme||'dark');
 function setTool(t){tool=t;document.querySelectorAll('#nv [data-t]').forEach(b=>b.classList.toggle('on',b.dataset.t==t));refresh()}
-$('#nv').onclick=e=>{const b=e.target.closest('[data-t]');if(!b)return;const t=b.dataset.t;if(t=='move'||t=='rot'||t=='scl')setTool(t);else if(t=='u')undo();else if(t=='r')redo();else if(t[0]=='p')openPal(t.slice(2));else run(CMD.find(c=>c.n==t.slice(2)))};
+$('#nv').onclick=e=>{const b=e.target.closest('[data-t]');if(!b)return;const t=b.dataset.t;if(t=='move'||t=='rot'||t=='scl')setTool(t);else if(t=='u')undo();else if(t=='r')redo();else if(t=='all')openPal();else if(t=='theme')applyTheme(document.documentElement.dataset.theme==='dark'?'light':'dark');else if(t[0]=='p')openPal(t.slice(2));else run(CMD.find(c=>c.n==t.slice(2)))};
 $('#ex').onclick=()=>shot(2,0);
 
 /* ---------- パレット ---------- */
@@ -736,7 +785,7 @@ cats.onclick=e=>{const c=e.target.dataset.c;if(c){pc=c;pi=0;drawPal();q.focus()}
 res.onclick=e=>{const i=e.target.closest('.it');if(i&&i.dataset.i!=null)execPal(+i.dataset.i)};
 [pal,$('#pv')].forEach(m=>m.addEventListener('pointerdown',e=>{if(e.target==m)closeAll()}));
 $('#pc').onclick=closeAll;$('#sb').onclick=()=>openPal();$('#hx').onclick=()=>$('#hint').remove();
-$('#sb').innerHTML=ic('search')+'<span>やりたいことを検索して実行</span><kbd>Ctrl+K</kbd>';
+$('#sb').innerHTML=ic('search')+'<span>操作を一覧・検索</span><kbd>Ctrl+K</kbd>';
 /* ---------- キーボード ---------- */
 addEventListener('keydown',e=>{const typing=['INPUT','SELECT'].includes(e.target.tagName),k=e.key.toLowerCase(),c=e.ctrlKey||e.metaKey;
  if(c&&k=='k'||(!typing&&e.key=='/')){e.preventDefault();openPal();return}
@@ -750,7 +799,7 @@ addEventListener('keydown',e=>{const typing=['INPUT','SELECT'].includes(e.target
  else if(ar){e.preventDefault();run({f:()=>need().forEach(o=>o.position[ar[0]]+=ar[1]*.5)})}});
 
 /* ---------- ビューポート操作 ---------- */
-const ray=new T.Raycaster(),mv=new T.Vector2(),gp=new T.Plane(Y,0);let dr=null;
+const ray=new T.Raycaster(),mv=new T.Vector2(),gp=new T.Plane(Y,0),zCoordPlane=new T.Plane(new T.Vector3(0,0,1),0),zCoordHit=new T.Vector3();let dr=null;
 function ndc(e){const r=cv.getBoundingClientRect();mv.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height*2-1));ray.setFromCamera(mv,cam)}
 const pickAt=e=>{ndc(e);const h=ray.intersectObjects(objs.filter(o=>o.visible),false)[0];return h&&h.object},hitPlane=e=>{ndc(e);const p=new T.Vector3();return ray.ray.intersectPlane(gp,p)?p:null};
 cv.addEventListener('contextmenu',e=>e.preventDefault());
@@ -758,7 +807,7 @@ cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);let o=e.
  if(o){if(e.shiftKey&&sel.includes(o)){sel=sel.filter(s=>s!==o);refresh();dr.o=null;return}
   if(!sel.includes(o)){sel=e.shiftKey?[...sel,o]:[o];refresh()}
   dr.pre=snap();gp.constant=-o.position.y;dr.p0=hitPlane(e);dr.st=sel.map(s=>s.position.clone())}});
-cv.addEventListener('pointermove',e=>{if(!dr)return;if(!dr.moved&&Math.hypot(e.clientX-dr.x,e.clientY-dr.y)<3)return;dr.moved=true;const mx=e.movementX||0,my=e.movementY||0;
+cv.addEventListener('pointermove',e=>{const out=$('#coord-readout');if(zGuide.visible){ndc(e);const p=ray.ray.intersectPlane(zCoordPlane,zCoordHit);out.textContent=p?`Z = 0 · X ${f2(p.x)} / Y ${f2(p.y)}`:'Z = 0 · 交点なし'}else out.textContent='Z = 0 面は非表示です';if(!dr)return;if(!dr.moved&&Math.hypot(e.clientX-dr.x,e.clientY-dr.y)<3)return;dr.moved=true;const mx=e.movementX||0,my=e.movementY||0;
  if(dr.o){if(tool=='move'){const p=hitPlane(e);if(p&&dr.p0)sel.forEach((s,i)=>{s.position.x=dr.st[i].x+p.x-dr.p0.x;s.position.z=dr.st[i].z+p.z-dr.p0.z})}
   else if(tool=='rot')sel.forEach(s=>{s.rotation.y+=mx*.01;s.rotation.x+=my*.01});
   else{const f=1-my*.01;sel.forEach(s=>s.scale.multiplyScalar(f))}}
